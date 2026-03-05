@@ -1,5 +1,18 @@
+# Backend
 backend/.env
 backend/node_modules/
 backend/dist/
 backend/prisma/dev.db
 backend/prisma/dev.db-journal
+backend/prisma/*.db-shm
+backend/prisma/*.db-wal
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+
+# General
+*.log
+.DS_Store
