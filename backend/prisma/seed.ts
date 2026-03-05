@@ -153,9 +153,6 @@ async function main() {
     },
   })
 
-  void hr
-  void employees
-
   console.log('Seed completed successfully!')
   console.log(`Created users: admin@example.com, hr@example.com, employee1-3@example.com`)
   console.log(`Created 3 gift card templates and 2 email templates`)
