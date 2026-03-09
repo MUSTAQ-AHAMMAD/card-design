@@ -3,7 +3,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCategories = exports.deleteTemplate = exports.updateTemplate = exports.getTemplateById = exports.createTemplate = exports.listTemplates = void 0;
+exports.uploadDesignImageHandler = exports.getCategories = exports.deleteTemplate = exports.updateTemplate = exports.getTemplateById = exports.createTemplate = exports.listTemplates = void 0;
+const path_1 = __importDefault(require("path"));
+const fs_1 = __importDefault(require("fs"));
 const prisma_1 = __importDefault(require("../lib/prisma"));
 const errorHandler_1 = require("../middleware/errorHandler");
 const helpers_1 = require("../utils/helpers");
@@ -124,4 +126,23 @@ const getCategories = async (req, res, next) => {
     }
 };
 exports.getCategories = getCategories;
+const uploadDesignImageHandler = async (req, res, next) => {
+    try {
+        if (!req.file) {
+            throw new errorHandler_1.AppError('No image file provided', 400);
+        }
+        // Build the public URL path for the uploaded file
+        const imageUrl = `/uploads/${req.file.filename}`;
+        res.status(201).json({ success: true, data: { imageUrl } });
+    }
+    catch (error) {
+        // Clean up the uploaded file if something went wrong after multer saved it
+        if (req.file) {
+            const filePath = path_1.default.join(__dirname, '../../uploads', req.file.filename);
+            fs_1.default.unlink(filePath, () => { });
+        }
+        next(error);
+    }
+};
+exports.uploadDesignImageHandler = uploadDesignImageHandler;
 //# sourceMappingURL=templateController.js.map

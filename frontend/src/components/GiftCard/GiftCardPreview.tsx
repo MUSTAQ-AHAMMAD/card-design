@@ -49,7 +49,13 @@ const LOGO_SVGS: Record<LogoOption, React.ReactNode> = {
   ),
 }
 
-const defaultDesign = {
+const defaultDesign: {
+  backgroundColor: string
+  textColor: string
+  accentColor: string
+  borderRadius: string
+  backgroundImage?: string
+} = {
   backgroundColor: '#4F46E5',
   textColor: '#FFFFFF',
   accentColor: '#F59E0B',
@@ -73,31 +79,52 @@ export function GiftCardPreview({
       className={`relative overflow-hidden shadow-2xl ${compact ? 'w-full max-w-xs' : 'w-full max-w-sm'}`}
       style={{
         borderRadius: design.borderRadius || '16px',
-        background: design.backgroundColor || '#4F46E5',
+        background: design.backgroundImage ? undefined : (design.backgroundColor || '#4F46E5'),
         aspectRatio: '1.586 / 1',
       }}
     >
-      {/* Background pattern */}
-      <div
-        className="absolute inset-0 opacity-10"
-        style={{
-          backgroundImage: `radial-gradient(circle at 20% 80%, ${design.accentColor || '#F59E0B'} 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, white 0%, transparent 50%)`,
-        }}
-      />
+      {/* Uploaded background image */}
+      {design.backgroundImage && (
+        <img
+          src={design.backgroundImage}
+          alt="Card background"
+          className="absolute inset-0 w-full h-full object-cover"
+          crossOrigin="anonymous"
+        />
+      )}
 
-      {/* Decorative circles */}
-      <div
-        className="absolute -top-8 -right-8 w-32 h-32 rounded-full opacity-20"
-        style={{ background: design.accentColor || '#F59E0B' }}
-      />
-      <div
-        className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full opacity-15"
-        style={{ background: 'white' }}
-      />
+      {/* Background pattern (only when no image) */}
+      {!design.backgroundImage && (
+        <div
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage: `radial-gradient(circle at 20% 80%, ${design.accentColor || '#F59E0B'} 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, white 0%, transparent 50%)`,
+          }}
+        />
+      )}
+
+      {/* Decorative circles (only when no image) */}
+      {!design.backgroundImage && (
+        <>
+          <div
+            className="absolute -top-8 -right-8 w-32 h-32 rounded-full opacity-20"
+            style={{ background: design.accentColor || '#F59E0B' }}
+          />
+          <div
+            className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full opacity-15"
+            style={{ background: 'white' }}
+          />
+        </>
+      )}
+
+      {/* Dark overlay when background image is present for text readability */}
+      {design.backgroundImage && (
+        <div className="absolute inset-0 bg-black/40" />
+      )}
 
       {/* Content */}
-      <div className="relative h-full flex flex-col justify-between p-5" style={{ color: design.textColor || '#FFFFFF' }}>
+      <div className="relative h-full flex flex-col justify-between p-5" style={{ color: design.backgroundImage ? '#FFFFFF' : (design.textColor || '#FFFFFF') }}>
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -108,14 +135,17 @@ export function GiftCardPreview({
             {logoOption && logoOption !== 'none' && (
               <div
                 className={`rounded-full flex items-center justify-center opacity-90 ${compact ? 'w-6 h-6' : 'w-8 h-8'}`}
-                style={{ color: design.accentColor || '#F59E0B' }}
+                style={{ color: design.backgroundImage ? '#F59E0B' : (design.accentColor || '#F59E0B') }}
               >
                 {LOGO_SVGS[logoOption]}
               </div>
             )}
             <div
               className="px-3 py-1 rounded-full text-xs font-bold"
-              style={{ background: design.accentColor || '#F59E0B', color: '#1F2937' }}
+              style={{
+                background: design.backgroundImage ? 'rgba(245,158,11,0.9)' : (design.accentColor || '#F59E0B'),
+                color: '#1F2937',
+              }}
             >
               GIFT
             </div>
