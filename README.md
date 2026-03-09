@@ -154,6 +154,34 @@ The compiled frontend files will be in `frontend/dist/`.
 
 ---
 
+## Screenshots
+
+### Login
+![Login Page](screenshots/login.png)
+
+### Dashboard
+![Dashboard](screenshots/dashboard.png)
+
+### Gift Cards
+![Gift Cards](screenshots/gift-cards.png)
+
+### Templates
+![Templates](screenshots/templates.png)
+
+### Create Gift Card
+![Create Gift Card](screenshots/gift-card-creator.png)
+
+### Email Templates
+![Email Templates](screenshots/email-templates.png)
+
+### Admin Panel
+![Admin Panel](screenshots/admin-panel.png)
+
+### Settings
+![Settings](screenshots/settings.png)
+
+---
+
 ## Troubleshooting
 
 | Problem | Solution |
