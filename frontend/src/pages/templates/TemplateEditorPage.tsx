@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Save, X } from 'lucide-react'
+import { Save, X, Upload, Trash2 } from 'lucide-react'
 import { templatesApi } from '../../services/api'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
@@ -32,6 +32,9 @@ export default function TemplateEditorPage() {
   const isEditing = !!id
   const [loading, setLoading] = useState(isEditing)
   const [saving, setSaving] = useState(false)
+  const [backgroundImage, setBackgroundImage] = useState<string | undefined>(undefined)
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const { control, register, handleSubmit, watch, reset, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -58,6 +61,7 @@ export default function TemplateEditorPage() {
       accentColor: formValues.accentColor,
       fontFamily: 'Inter',
       borderRadius: formValues.borderRadius,
+      backgroundImage,
     },
     isActive: true,
     usageCount: 0,
@@ -78,11 +82,36 @@ export default function TemplateEditorPage() {
             accentColor: t.designData.accentColor,
             borderRadius: t.designData.borderRadius,
           })
+          if (t.designData.backgroundImage) {
+            setBackgroundImage(t.designData.backgroundImage)
+          }
         })
         .catch(() => toast.error('Failed to load template'))
         .finally(() => setLoading(false))
     }
   }, [id, reset])
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    try {
+      const res = await templatesApi.uploadDesignImage(file)
+      setBackgroundImage(res.data.data.imageUrl)
+      toast.success('Design image uploaded successfully')
+    } catch {
+      toast.error('Failed to upload image. Please try again.')
+    } finally {
+      setUploading(false)
+      // Reset the input so the same file can be re-uploaded if needed
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
+
+  const handleRemoveImage = () => {
+    setBackgroundImage(undefined)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
 
   const onSubmit = async (data: FormData) => {
     setSaving(true)
@@ -95,6 +124,7 @@ export default function TemplateEditorPage() {
         accentColor: data.accentColor,
         fontFamily: 'Inter',
         borderRadius: data.borderRadius,
+        ...(backgroundImage ? { backgroundImage } : {}),
       },
     }
     try {
@@ -173,9 +203,76 @@ export default function TemplateEditorPage() {
               {errors.category && <p className="text-xs text-red-500">{errors.category.message}</p>}
             </div>
 
+            {/* Upload Design Image */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-gray-700">Background Design Image</label>
+              <p className="text-xs text-gray-500">
+                Upload a custom design image (JPEG, PNG, GIF, WebP — max 5 MB).
+                Employees will be able to customize text and logo overlays on top of it.
+              </p>
+              {backgroundImage ? (
+                <div className="relative rounded-lg overflow-hidden border border-gray-200">
+                  <img
+                    src={backgroundImage}
+                    alt="Uploaded design"
+                    className="w-full h-32 object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleRemoveImage}
+                    className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 transition-colors"
+                    title="Remove image"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="flex items-center justify-center gap-2 w-full h-24 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-indigo-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {uploading ? (
+                    <>
+                      <LoadingSpinner size="sm" />
+                      <span>Uploading…</span>
+                    </>
+                  ) : (
+                    <>
+                      <Upload size={18} />
+                      <span>Click to upload design image</span>
+                    </>
+                  )}
+                </button>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                className="hidden"
+                onChange={handleImageUpload}
+              />
+              {backgroundImage && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  leftIcon={<Upload size={14} />}
+                  loading={uploading}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  Replace Image
+                </Button>
+              )}
+            </div>
+
+            {/* Color settings (used as fallback / overlay accent when image is present) */}
             <div className="grid grid-cols-3 gap-4">
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-gray-700">Background</label>
+                <label className="text-sm font-medium text-gray-700">
+                  {backgroundImage ? 'Fallback BG' : 'Background'}
+                </label>
                 <Controller
                   name="backgroundColor"
                   control={control}
@@ -245,6 +342,11 @@ export default function TemplateEditorPage() {
           <p className="text-xs text-gray-400 text-center mt-3">
             Live preview updates as you change settings
           </p>
+          {backgroundImage && (
+            <p className="text-xs text-indigo-500 text-center mt-1">
+              Employees can customize their name and logo on top of this design
+            </p>
+          )}
         </Card>
       </div>
     </div>

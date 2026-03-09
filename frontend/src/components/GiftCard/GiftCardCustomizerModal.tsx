@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { X, ImageIcon, FileText } from 'lucide-react'
+import { X, ImageIcon, FileText, ImagePlus } from 'lucide-react'
 import html2canvas from 'html2canvas'
 import { jsPDF } from 'jspdf'
 import { Modal } from '../ui/Modal'
@@ -30,6 +30,8 @@ export function GiftCardCustomizerModal({ isOpen, onClose, card }: GiftCardCusto
   const [logoOption, setLogoOption] = useState<LogoOption>('none')
   const [downloading, setDownloading] = useState<'jpeg' | 'pdf' | null>(null)
   const previewRef = useRef<HTMLDivElement>(null)
+
+  const hasUploadedDesign = !!card.template?.designData?.backgroundImage
 
   const captureCard = async (): Promise<HTMLCanvasElement> => {
     if (!previewRef.current) throw new Error('Preview not available')
@@ -82,6 +84,14 @@ export function GiftCardCustomizerModal({ isOpen, onClose, card }: GiftCardCusto
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Editor panel */}
         <div className="flex-1 space-y-5">
+          {/* HR-uploaded design badge */}
+          {hasUploadedDesign && (
+            <div className="flex items-center gap-2 px-3 py-2 bg-indigo-50 border border-indigo-200 rounded-lg text-sm text-indigo-700">
+              <ImagePlus size={15} className="shrink-0" />
+              <span>This card uses a custom design uploaded by HR. Personalize it below.</span>
+            </div>
+          )}
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Your Name on Card</label>
             <Input

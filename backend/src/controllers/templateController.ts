@@ -1,4 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
+import path from 'path'
+import fs from 'fs'
 import prisma from '../lib/prisma'
 import { AppError } from '../middleware/errorHandler'
 import { generatePaginationMeta, parsePaginationParams } from '../utils/helpers'
@@ -112,6 +114,25 @@ export const getCategories = async (req: Request, res: Response, next: NextFunct
     const categories = templates.map((t) => t.category)
     res.json({ success: true, data: categories })
   } catch (error) {
+    next(error)
+  }
+}
+
+export const uploadDesignImageHandler = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    if (!req.file) {
+      throw new AppError('No image file provided', 400)
+    }
+
+    // Build the public URL path for the uploaded file
+    const imageUrl = `/uploads/${req.file.filename}`
+    res.status(201).json({ success: true, data: { imageUrl } })
+  } catch (error) {
+    // Clean up the uploaded file if something went wrong after multer saved it
+    if (req.file) {
+      const filePath = path.join(__dirname, '../../uploads', req.file.filename)
+      fs.unlink(filePath, () => { /* ignore cleanup errors */ })
+    }
     next(error)
   }
 }

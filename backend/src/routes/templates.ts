@@ -1,13 +1,15 @@
 import { Router } from 'express'
 import { body } from 'express-validator'
-import { listTemplates, createTemplate, getTemplateById, updateTemplate, deleteTemplate, getCategories } from '../controllers/templateController'
+import { listTemplates, createTemplate, getTemplateById, updateTemplate, deleteTemplate, getCategories, uploadDesignImageHandler } from '../controllers/templateController'
 import { requireHROrAdmin } from '../middleware/auth'
 import { validate } from '../middleware/validate'
+import { uploadDesignImage } from '../middleware/upload'
 
 const router = Router()
 
 router.get('/', listTemplates)
 router.get('/categories', getCategories)
+router.post('/upload-image', requireHROrAdmin, uploadDesignImage, uploadDesignImageHandler)
 router.post('/',
   requireHROrAdmin,
   [

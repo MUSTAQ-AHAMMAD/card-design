@@ -7,6 +7,7 @@ require("dotenv/config");
 const express_1 = __importDefault(require("express"));
 const helmet_1 = __importDefault(require("helmet"));
 const cors_1 = __importDefault(require("cors"));
+const path_1 = __importDefault(require("path"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const auth_1 = __importDefault(require("./routes/auth"));
 const users_1 = __importDefault(require("./routes/users"));
@@ -18,13 +19,17 @@ const auth_2 = require("./middleware/auth");
 const errorHandler_1 = require("./middleware/errorHandler");
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3001;
-app.use((0, helmet_1.default)());
+app.use((0, helmet_1.default)({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+}));
 app.use((0, cors_1.default)({
     origin: process.env.FRONTEND_URL || 'http://localhost:5173',
     credentials: true,
 }));
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
+// Serve uploaded design images
+app.use('/uploads', express_1.default.static(path_1.default.join(__dirname, '../uploads')));
 const limiter = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000,
     max: 100,

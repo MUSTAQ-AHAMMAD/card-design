@@ -136,6 +136,14 @@ export const templatesApi = {
     api.put<Template>(`/templates/${id}`, data),
 
   delete: (id: string) => api.delete(`/templates/${id}`),
+
+  uploadDesignImage: (file: File) => {
+    const formData = new FormData()
+    formData.append('image', file)
+    return api.post<{ success: boolean; data: { imageUrl: string } }>('/templates/upload-image', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
 }
 
 // ── Gift Cards ───────────────────────────────────────────────────────────────
