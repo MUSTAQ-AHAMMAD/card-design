@@ -6,8 +6,9 @@ import { Card } from '../../components/ui/Card'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { GiftCardPreview } from '../../components/GiftCard/GiftCardPreview'
+import { GiftCardCustomizerModal } from '../../components/GiftCard/GiftCardCustomizerModal'
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner'
-import { Plus, History } from 'lucide-react'
+import { Plus, History, Pencil } from 'lucide-react'
 import { format } from 'date-fns'
 import type { GiftCard, GiftCardStatus } from '../../types'
 
@@ -29,6 +30,7 @@ export default function EmployeeDashboard() {
   const { user } = useAuth()
   const [cards, setCards] = useState<GiftCard[]>(MOCK_CARDS)
   const [loading, setLoading] = useState(true)
+  const [customizerCard, setCustomizerCard] = useState<GiftCard | null>(null)
 
   useEffect(() => {
     giftCardsApi.getHistory()
@@ -117,6 +119,15 @@ export default function EmployeeDashboard() {
                       <p className="text-xs text-gray-400 mt-2">
                         {format(new Date(card.createdAt), 'MMM d, yyyy')}
                       </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full mt-3"
+                        leftIcon={<Pencil size={14} />}
+                        onClick={() => setCustomizerCard(card)}
+                      >
+                        Customize & Download
+                      </Button>
                     </div>
                   </Card>
                 ))}
@@ -155,6 +166,14 @@ export default function EmployeeDashboard() {
             </div>
           )}
         </>
+      )}
+
+      {customizerCard && (
+        <GiftCardCustomizerModal
+          isOpen={!!customizerCard}
+          onClose={() => setCustomizerCard(null)}
+          card={customizerCard}
+        />
       )}
     </div>
   )

@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, Search, Filter } from 'lucide-react'
+import { Plus, Search, Filter, Users } from 'lucide-react'
 import { giftCardsApi } from '../../services/api'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Badge } from '../../components/ui/Badge'
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner'
+import { useAuth } from '../../hooks/useAuth'
 import { format } from 'date-fns'
 import type { GiftCard, GiftCardStatus } from '../../types'
 
@@ -29,6 +30,8 @@ const statusBadgeMap: Record<GiftCardStatus, { variant: 'success' | 'warning' | 
 const STATUS_FILTERS = ['All', 'DRAFT', 'SENT', 'RECEIVED', 'REDEEMED', 'EXPIRED']
 
 export default function GiftCardsPage() {
+  const { user } = useAuth()
+  const isAdminOrHR = user?.role === 'ADMIN' || user?.role === 'HR_MANAGER'
   const [cards, setCards] = useState<GiftCard[]>(MOCK_CARDS)
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -59,9 +62,16 @@ export default function GiftCardsPage() {
           <h1 className="text-2xl font-bold text-gray-900">Gift Cards</h1>
           <p className="text-gray-500 mt-1">Track and manage all your gift cards</p>
         </div>
-        <Link to="/gift-cards/create">
-          <Button leftIcon={<Plus size={16} />}>Create Gift Card</Button>
-        </Link>
+        <div className="flex items-center gap-3">
+          {isAdminOrHR && (
+            <Link to="/gift-cards/bulk-send">
+              <Button variant="outline" leftIcon={<Users size={16} />}>Bulk Send</Button>
+            </Link>
+          )}
+          <Link to="/gift-cards/create">
+            <Button leftIcon={<Plus size={16} />}>Create Gift Card</Button>
+          </Link>
+        </div>
       </div>
 
       {/* Filters */}

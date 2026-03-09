@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
-import type { User, LoginCredentials, RegisterData } from '../types'
+import type { User, LoginCredentials, RegisterData, ApiResponse } from '../types'
 import { authApi, usersApi } from '../services/api'
 import toast from 'react-hot-toast'
 
@@ -20,8 +20,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const refreshProfile = useCallback(async () => {
     try {
-      const { data } = await usersApi.getProfile()
-      setUser(data)
+      const res = await usersApi.getProfile()
+      // Backend wraps response in ApiResponse<User>
+      const userData = (res.data as unknown as ApiResponse<User>).data ?? res.data
+      setUser(userData)
     } catch {
       setUser(null)
       localStorage.removeItem('accessToken')
@@ -39,17 +41,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [refreshProfile])
 
   const login = useCallback(async (credentials: LoginCredentials) => {
-    const { data } = await authApi.login(credentials)
-    localStorage.setItem('accessToken', data.tokens.accessToken)
-    localStorage.setItem('refreshToken', data.tokens.refreshToken)
-    setUser(data.user)
+    const res = await authApi.login(credentials)
+    // Backend returns ApiResponse<{ user, accessToken, refreshToken }>
+    const payload = (res.data as unknown as ApiResponse<{ user: User; accessToken: string; refreshToken: string }>).data
+    localStorage.setItem('accessToken', payload.accessToken)
+    localStorage.setItem('refreshToken', payload.refreshToken)
+    setUser(payload.user)
   }, [])
 
   const register = useCallback(async (registerData: RegisterData) => {
-    const { data } = await authApi.register(registerData)
-    localStorage.setItem('accessToken', data.tokens.accessToken)
-    localStorage.setItem('refreshToken', data.tokens.refreshToken)
-    setUser(data.user)
+    const res = await authApi.register(registerData)
+    const payload = (res.data as unknown as ApiResponse<{ user: User; accessToken: string; refreshToken: string }>).data
+    localStorage.setItem('accessToken', payload.accessToken)
+    localStorage.setItem('refreshToken', payload.refreshToken)
+    setUser(payload.user)
   }, [])
 
   const logout = useCallback(async () => {
