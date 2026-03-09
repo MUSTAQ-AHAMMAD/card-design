@@ -12,6 +12,7 @@ import TemplatesPage from './pages/templates/TemplatesPage'
 import TemplateEditorPage from './pages/templates/TemplateEditorPage'
 import GiftCardsPage from './pages/gift-cards/GiftCardsPage'
 import GiftCardCreatorPage from './pages/gift-cards/GiftCardCreatorPage'
+import BulkGiftCardPage from './pages/gift-cards/BulkGiftCardPage'
 import EmailTemplatesPage from './pages/email/EmailTemplatesPage'
 import AdminPanel from './pages/admin/AdminPanel'
 import EmployeeDashboard from './pages/employee/EmployeeDashboard'
@@ -62,6 +63,9 @@ function AppRoutes() {
         } />
         <Route path="/gift-cards" element={<GiftCardsPage />} />
         <Route path="/gift-cards/create" element={<GiftCardCreatorPage />} />
+        <Route path="/gift-cards/bulk-send" element={
+          <AdminOrHRRoute><BulkGiftCardPage /></AdminOrHRRoute>
+        } />
         <Route path="/email-templates" element={<EmailTemplatesPage />} />
         <Route path="/admin" element={
           <AdminOrHRRoute><AdminPanel /></AdminOrHRRoute>
