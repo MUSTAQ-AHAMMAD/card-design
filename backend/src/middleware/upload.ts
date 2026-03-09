@@ -20,7 +20,7 @@ const fileFilter: multer.Options['fileFilter'] = (_req, file, cb) => {
   if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
     cb(null, true)
   } else {
-    cb(new AppError('Only image files (JPEG, PNG, GIF, WebP, SVG) are allowed', 400))
+    cb(new AppError('Only image files (JPEG, PNG, GIF, WebP) are allowed', 400))
   }
 }
 
