@@ -18,3 +18,4 @@ frontend/.env.local
 # General
 *.log
 .DS_Store
+nohup.out
