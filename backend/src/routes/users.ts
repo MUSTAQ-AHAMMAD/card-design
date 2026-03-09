@@ -1,12 +1,12 @@
 import { Router } from 'express'
 import { body } from 'express-validator'
 import { getUsers, getProfile, updateProfile, changePassword, getUserById, updateUser, deleteUser } from '../controllers/userController'
-import { requireAdmin } from '../middleware/auth'
+import { requireAdmin, requireHROrAdmin } from '../middleware/auth'
 import { validate } from '../middleware/validate'
 
 const router = Router()
 
-router.get('/', requireAdmin, getUsers)
+router.get('/', requireHROrAdmin, getUsers)
 router.get('/profile', getProfile)
 router.put('/profile',
   [

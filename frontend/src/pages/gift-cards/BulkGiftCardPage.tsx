@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Plus, Trash2, Users, Send, ChevronRight, Check, Upload } from 'lucide-react'
-import { templatesApi, giftCardsApi } from '../../services/api'
+import { Plus, Trash2, Users, Send, ChevronRight, Check, Upload, UserCheck } from 'lucide-react'
+import { templatesApi, giftCardsApi, usersApi } from '../../services/api'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
@@ -56,6 +56,7 @@ export default function BulkGiftCardPage() {
   const [newName, setNewName] = useState('')
   const [emailError, setEmailError] = useState('')
   const [csvLoading, setCsvLoading] = useState(false)
+  const [loadingEmployees, setLoadingEmployees] = useState(false)
 
   const { control, register, handleSubmit, watch, setValue, formState: { errors } } = useForm<BulkForm>({
     resolver: zodResolver(bulkSchema),
@@ -143,6 +144,38 @@ export default function BulkGiftCardPage() {
     reader.readAsText(file)
     // Reset file input so same file can be re-uploaded
     e.target.value = ''
+  }
+
+  const handleLoadAllEmployees = async () => {
+    setLoadingEmployees(true)
+    try {
+      const res = await usersApi.getEmployees()
+      const allUsers = res.data.data ?? []
+      const newRecipients: Recipient[] = []
+      let added = 0
+      for (const u of allUsers) {
+        if (
+          u.email &&
+          u.isActive &&
+          !recipients.some((r) => r.email.toLowerCase() === u.email.toLowerCase()) &&
+          !newRecipients.some((r) => r.email.toLowerCase() === u.email.toLowerCase())
+        ) {
+          newRecipients.push({
+            id: crypto.randomUUID(),
+            email: u.email,
+            name: `${u.firstName} ${u.lastName}`.trim(),
+          })
+          added++
+        }
+      }
+      setRecipients((prev) => [...prev, ...newRecipients])
+      if (added > 0) toast.success(`Loaded ${added} employee${added !== 1 ? 's' : ''} from database`)
+      else toast(`All employees are already in the recipients list`, { icon: 'ℹ️' })
+    } catch {
+      toast.error('Failed to load employees. Check your permissions.')
+    } finally {
+      setLoadingEmployees(false)
+    }
   }
 
   const handleBulkSend = handleSubmit(async (data) => {
@@ -367,6 +400,24 @@ export default function BulkGiftCardPage() {
                   disabled={csvLoading}
                 />
               </label>
+            </div>
+
+            {/* Load all employees */}
+            <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 mb-4">
+              <p className="text-sm font-medium text-emerald-800 mb-1">Send to All Employees</p>
+              <p className="text-xs text-emerald-600 mb-3">
+                Automatically load all active employees from the database as recipients.
+              </p>
+              <Button
+                variant="outline"
+                leftIcon={<UserCheck size={16} />}
+                loading={loadingEmployees}
+                disabled={loadingEmployees}
+                onClick={handleLoadAllEmployees}
+                className="border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+              >
+                Load All Employees
+              </Button>
             </div>
 
             {/* Manual add */}

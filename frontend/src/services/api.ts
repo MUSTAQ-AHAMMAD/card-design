@@ -101,8 +101,24 @@ export const authApi = {
 
 // ── Users ───────────────────────────────────────────────────────────────────
 export const usersApi = {
-  getAll: (params?: { page?: number; limit?: number; search?: string }) =>
+  getAll: (params?: { page?: number; limit?: number; search?: string; role?: string }) =>
     api.get<PaginatedResponse<User>>('/users', { params }),
+
+  getEmployees: async () => {
+    // Fetch all active employees by paginating through results
+    const firstPage = await api.get<PaginatedResponse<User>>('/users', { params: { role: 'EMPLOYEE', limit: 100, page: 1 } })
+    const { data: firstData, meta } = firstPage.data
+    if (!meta || meta.totalPages <= 1) {
+      return { ...firstPage, data: { data: firstData, meta } }
+    }
+    const remaining = await Promise.all(
+      Array.from({ length: meta.totalPages - 1 }, (_, i) =>
+        api.get<PaginatedResponse<User>>('/users', { params: { role: 'EMPLOYEE', limit: 100, page: i + 2 } })
+      )
+    )
+    const allData = [...firstData, ...remaining.flatMap((r) => r.data.data)]
+    return { ...firstPage, data: { data: allData, meta: { ...meta, page: 1, totalPages: 1 } } }
+  },
 
   getProfile: () => api.get<User>('/users/profile'),
 

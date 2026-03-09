@@ -76,11 +76,13 @@ export function GiftCardPreview({
 
   return (
     <div
-      className={`relative overflow-hidden shadow-2xl ${compact ? 'w-full max-w-xs' : 'w-full max-w-sm'}`}
+      className="relative overflow-hidden shadow-2xl"
       style={{
+        width: compact ? '220px' : '340px',
+        height: compact ? '139px' : '214px',
+        minWidth: compact ? '220px' : '340px',
         borderRadius: design.borderRadius || '16px',
         background: design.backgroundImage ? undefined : (design.backgroundColor || '#4F46E5'),
-        aspectRatio: '1.586 / 1',
       }}
     >
       {/* Uploaded background image */}

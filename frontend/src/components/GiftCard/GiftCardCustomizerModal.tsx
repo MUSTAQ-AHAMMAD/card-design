@@ -153,7 +153,7 @@ export function GiftCardCustomizerModal({ isOpen, onClose, card }: GiftCardCusto
         {/* Card preview */}
         <div className="flex flex-col items-center gap-3">
           <p className="text-sm font-medium text-gray-500 self-start">Live Preview</p>
-          <div ref={previewRef} className="inline-block">
+          <div ref={previewRef} className="inline-flex">
             <GiftCardPreview
               template={card.template}
               amount={card.amount}
