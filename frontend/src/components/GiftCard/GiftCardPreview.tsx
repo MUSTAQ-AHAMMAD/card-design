@@ -1,4 +1,3 @@
-import React from 'react'
 import type { Template } from '../../types'
 
 export type LogoOption = 'none' | 'star' | 'diamond' | 'shield' | 'crown' | 'heart' | 'rocket'
@@ -12,54 +11,43 @@ interface GiftCardPreviewProps {
   senderName?: string
   compact?: boolean
   logoOption?: LogoOption
+  companyName?: string
 }
 
-const LOGO_SVGS: Record<LogoOption, React.ReactNode> = {
-  none: null,
-  star: (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
-      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-    </svg>
-  ),
-  diamond: (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
-      <path d="M6 2l-6 8 12 12L24 10 18 2H6zM2.5 9L6 4h12l3.5 5-9.5 9.5L2.5 9z" />
-    </svg>
-  ),
-  shield: (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
-      <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" />
-    </svg>
-  ),
-  crown: (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
-      <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z" />
-    </svg>
-  ),
-  heart: (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
-      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-    </svg>
-  ),
-  rocket: (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
-      <path d="M12 2.5C9.5 2.5 6 6.5 6 12H4l4 4 4-4h-2c0-4.5 2.5-7.5 4-8.5 1.5 1 4 4 4 8.5h-2l4 4 4-4h-2c0-5.5-3.5-9.5-6-9.5z" />
-      <circle cx="12" cy="19" r="1.5" />
-    </svg>
-  ),
+const OCCASION_EMOJI: Record<string, string> = {
+  Birthday: '🎂',
+  'Work Anniversary': '🏆',
+  Holiday: '🎄',
+  Congratulations: '🎉',
+  'Thank You': '🙏',
+  Welcome: '👋',
+  'Performance Recognition': '⭐',
+  'New Employee Welcome': '🤝',
+  'Team Achievement': '🚀',
+  'Farewell Message': '💐',
+  Other: '🎁',
 }
 
-const defaultDesign: {
-  backgroundColor: string
-  textColor: string
-  accentColor: string
-  borderRadius: string
-  backgroundImage?: string
-} = {
-  backgroundColor: '#4F46E5',
+const OCCASION_HEADLINE: Record<string, string> = {
+  Birthday: 'Wishing You a Very Happy Birthday!',
+  'Work Anniversary': 'Celebrating Your Work Anniversary',
+  Holiday: 'Season\'s Greetings & Best Wishes',
+  Congratulations: 'Congratulations on Your Achievement!',
+  'Thank You': 'Thank You for Your Dedication',
+  Welcome: 'Welcome to the Team!',
+  'Performance Recognition': 'Recognizing Your Outstanding Performance',
+  'New Employee Welcome': 'Welcome Aboard — We\'re Glad You\'re Here',
+  'Team Achievement': 'Celebrating Our Team\'s Success',
+  'Farewell Message': 'Wishing You All the Best',
+  Other: 'A Special Recognition for You',
+}
+
+const defaultDesign = {
+  backgroundColor: '#1E3A5F',
   textColor: '#FFFFFF',
   accentColor: '#F59E0B',
-  borderRadius: '16px',
+  borderRadius: '8px',
+  backgroundImage: undefined as string | undefined,
 }
 
 export function GiftCardPreview({
@@ -68,113 +56,280 @@ export function GiftCardPreview({
   occasion = 'Birthday',
   message = 'Wishing you a wonderful day!',
   recipientName = 'John Doe',
-  senderName = 'The Team',
+  senderName = 'The HR Team',
   compact = false,
   logoOption = 'none',
+  companyName = 'CorpHR™ Connect',
 }: GiftCardPreviewProps) {
   const design = template?.designData || defaultDesign
+  const primaryColor = design.backgroundColor || defaultDesign.backgroundColor
+  const accentColor = design.accentColor || defaultDesign.accentColor
+  const emoji = OCCASION_EMOJI[occasion] || '🎁'
+  const headline = OCCASION_HEADLINE[occasion] || `A Special ${occasion} Message`
 
+  // Compact thumbnail: show a styled email header thumbnail
+  if (compact) {
+    return (
+      <div
+        style={{
+          width: '220px',
+          minWidth: '220px',
+          height: '139px',
+          borderRadius: design.borderRadius || '8px',
+          overflow: 'hidden',
+          background: '#f8fafc',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+          fontFamily: 'Arial, sans-serif',
+          position: 'relative',
+        }}
+      >
+        {/* Email header strip */}
+        <div style={{ background: primaryColor, padding: '10px 12px', position: 'relative' }}>
+          {design.backgroundImage && (
+            <img
+              src={design.backgroundImage}
+              alt=""
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.3 }}
+              crossOrigin="anonymous"
+            />
+          )}
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <div style={{ fontSize: '7px', color: 'rgba(255,255,255,0.7)', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '2px' }}>
+              Human Resources Department
+            </div>
+            <div style={{ fontSize: '11px', fontWeight: 700, color: '#fff' }}>{emoji} {occasion}</div>
+          </div>
+        </div>
+
+        {/* Divider accent */}
+        <div style={{ height: '3px', background: accentColor }} />
+
+        {/* Body snippet */}
+        <div style={{ padding: '8px 12px', flex: 1 }}>
+          <div style={{ fontSize: '8px', color: '#374151', fontWeight: 600, marginBottom: '3px' }}>
+            Dear {recipientName},
+          </div>
+          <div style={{ fontSize: '7px', color: '#6b7280', lineHeight: 1.4, marginBottom: '6px' }}>
+            {headline.length > 38 ? headline.slice(0, 38) + '…' : headline}
+          </div>
+          {/* Gift value badge */}
+          <div style={{
+            display: 'inline-block',
+            background: accentColor,
+            borderRadius: '4px',
+            padding: '2px 8px',
+            fontSize: '11px',
+            fontWeight: 900,
+            color: '#1F2937',
+          }}>
+            ${amount.toFixed(2)}
+          </div>
+        </div>
+
+        {/* Footer strip */}
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: '#f1f5f9', borderTop: '1px solid #e2e8f0', padding: '4px 12px', fontSize: '6px', color: '#94a3b8' }}>
+          From: {senderName} · Confidential HR Communication
+        </div>
+      </div>
+    )
+  }
+
+  // Full preview: professional MNC HR email template
   return (
     <div
-      className="relative overflow-hidden shadow-2xl"
       style={{
-        width: compact ? '220px' : '340px',
-        height: compact ? '139px' : '214px',
-        minWidth: compact ? '220px' : '340px',
-        borderRadius: design.borderRadius || '16px',
-        background: design.backgroundImage ? undefined : (design.backgroundColor || '#4F46E5'),
+        width: '520px',
+        minWidth: '520px',
+        fontFamily: 'Arial, Helvetica, sans-serif',
+        background: '#f1f5f9',
+        borderRadius: '8px',
+        overflow: 'hidden',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.14)',
       }}
     >
-      {/* Uploaded background image */}
-      {design.backgroundImage && (
-        <img
-          src={design.backgroundImage}
-          alt="Card background"
-          className="absolute inset-0 w-full h-full object-cover"
-          crossOrigin="anonymous"
-        />
-      )}
+      {/* Email chrome bar */}
+      <div style={{ background: '#e2e8f0', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: '6px', borderBottom: '1px solid #cbd5e1' }}>
+        <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#f87171' }} />
+        <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#fbbf24' }} />
+        <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#34d399' }} />
+        <div style={{ flex: 1, marginLeft: '8px', background: '#fff', borderRadius: '4px', padding: '3px 8px', fontSize: '10px', color: '#64748b' }}>
+          HR Communication · {occasion}
+        </div>
+      </div>
 
-      {/* Background pattern (only when no image) */}
-      {!design.backgroundImage && (
-        <div
-          className="absolute inset-0 opacity-10"
-          style={{
-            backgroundImage: `radial-gradient(circle at 20% 80%, ${design.accentColor || '#F59E0B'} 0%, transparent 50%),
-              radial-gradient(circle at 80% 20%, white 0%, transparent 50%)`,
-          }}
-        />
-      )}
+      {/* Email body wrapper */}
+      <div style={{ background: '#f1f5f9', padding: '16px' }}>
+        <div style={{ background: '#ffffff', borderRadius: '6px', overflow: 'hidden' }}>
 
-      {/* Decorative circles (only when no image) */}
-      {!design.backgroundImage && (
-        <>
-          <div
-            className="absolute -top-8 -right-8 w-32 h-32 rounded-full opacity-20"
-            style={{ background: design.accentColor || '#F59E0B' }}
-          />
-          <div
-            className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full opacity-15"
-            style={{ background: 'white' }}
-          />
-        </>
-      )}
-
-      {/* Dark overlay when background image is present for text readability */}
-      {design.backgroundImage && (
-        <div className="absolute inset-0 bg-black/40" />
-      )}
-
-      {/* Content */}
-      <div className="relative h-full flex flex-col justify-between p-5" style={{ color: design.backgroundImage ? '#FFFFFF' : (design.textColor || '#FFFFFF') }}>
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs opacity-70 uppercase tracking-widest font-medium">Gift Card</p>
-            <p className={`font-bold ${compact ? 'text-base' : 'text-lg'}`}>{occasion}</p>
-          </div>
-          <div className="flex items-center gap-2">
-            {logoOption && logoOption !== 'none' && (
-              <div
-                className={`rounded-full flex items-center justify-center opacity-90 ${compact ? 'w-6 h-6' : 'w-8 h-8'}`}
-                style={{ color: design.backgroundImage ? '#F59E0B' : (design.accentColor || '#F59E0B') }}
-              >
-                {LOGO_SVGS[logoOption]}
-              </div>
+          {/* Company Header */}
+          <div style={{ background: primaryColor, padding: '24px 28px 20px', position: 'relative', overflow: 'hidden' }}>
+            {design.backgroundImage && (
+              <img
+                src={design.backgroundImage}
+                alt=""
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.25 }}
+                crossOrigin="anonymous"
+              />
             )}
-            <div
-              className="px-3 py-1 rounded-full text-xs font-bold"
-              style={{
-                background: design.backgroundImage ? 'rgba(245,158,11,0.9)' : (design.accentColor || '#F59E0B'),
-                color: '#1F2937',
-              }}
-            >
-              GIFT
+            <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '4px' }}>
+                  Human Resources Department
+                </div>
+                <div style={{ color: '#ffffff', fontSize: '20px', fontWeight: 900, letterSpacing: '-0.3px' }}>
+                  {companyName}
+                </div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ background: accentColor, color: '#1F2937', fontSize: '10px', fontWeight: 700, padding: '4px 10px', borderRadius: '20px', letterSpacing: '1px', display: 'inline-block' }}>
+                  OFFICIAL
+                </div>
+                <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '9px', marginTop: '4px' }}>
+                  Employee Communication
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Accent stripe */}
+          <div style={{ height: '4px', background: `linear-gradient(90deg, ${accentColor} 0%, ${primaryColor} 100%)` }} />
+
+          {/* Occasion banner */}
+          <div style={{ background: '#fafafa', borderBottom: '1px solid #f0f0f0', padding: '14px 28px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '22px' }}>{emoji}</span>
+            <div>
+              <div style={{ fontSize: '13px', fontWeight: 800, color: '#1e293b' }}>{headline}</div>
+              <div style={{ fontSize: '10px', color: '#64748b', marginTop: '1px' }}>{occasion} Celebration</div>
+            </div>
+          </div>
+
+          {/* Body */}
+          <div style={{ padding: '20px 28px' }}>
+            {/* Salutation */}
+            <div style={{ fontSize: '13px', color: '#1e293b', marginBottom: '10px' }}>
+              Dear <strong>{recipientName}</strong>,
+            </div>
+
+            {/* Personal message */}
+            <div style={{ fontSize: '12px', color: '#374151', lineHeight: '1.6', marginBottom: '16px', padding: '12px 14px', background: '#f8fafc', borderLeft: `3px solid ${accentColor}`, borderRadius: '0 4px 4px 0' }}>
+              {message || 'On behalf of the entire organization, we wish to recognize this special occasion and express our sincere appreciation for your continued contributions.'}
+            </div>
+
+            {/* Gift card value block */}
+            <div style={{ background: primaryColor, borderRadius: '8px', padding: '16px 20px', marginBottom: '16px', position: 'relative', overflow: 'hidden' }}>
+              {design.backgroundImage && (
+                <img
+                  src={design.backgroundImage}
+                  alt=""
+                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.2 }}
+                  crossOrigin="anonymous"
+                />
+              )}
+              <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '9px', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '4px' }}>
+                    Gift Voucher Amount
+                  </div>
+                  <div style={{ color: '#ffffff', fontSize: '28px', fontWeight: 900 }}>
+                    ${amount.toFixed(2)}
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ background: accentColor, color: '#1F2937', fontSize: '9px', fontWeight: 700, padding: '3px 8px', borderRadius: '12px', marginBottom: '4px', display: 'inline-block' }}>
+                    GIFT VOUCHER
+                  </div>
+                  <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '9px' }}>Valid for use at<br/>approved partners</div>
+                </div>
+              </div>
+              {/* CTA button - preview only, not interactive */}
+              <div style={{ marginTop: '12px', textAlign: 'center' }}>
+                <div style={{ display: 'inline-block', background: accentColor, color: '#1F2937', fontSize: '10px', fontWeight: 700, padding: '7px 24px', borderRadius: '4px', letterSpacing: '0.5px', cursor: 'default', userSelect: 'none' }}>
+                  REDEEM YOUR GIFT →
+                </div>
+              </div>
+              <div style={{ marginTop: '6px', textAlign: 'center' }}>
+                <span style={{ fontSize: '8px', color: 'rgba(255,255,255,0.5)', fontStyle: 'italic' }}>Redemption link is included in the sent email</span>
+              </div>
+            </div>
+
+            {/* Signature */}
+            <div style={{ fontSize: '11px', color: '#374151', marginBottom: '4px' }}>
+              With warm regards,
+            </div>
+            <div style={{ fontSize: '12px', fontWeight: 700, color: '#1e293b' }}>{senderName}</div>
+            <div style={{ fontSize: '10px', color: '#64748b' }}>Human Resources Department</div>
+          </div>
+
+          {/* Footer */}
+          <div style={{ background: '#f8fafc', borderTop: '1px solid #e2e8f0', padding: '12px 28px' }}>
+            <div style={{ fontSize: '9px', color: '#94a3b8', lineHeight: '1.6', textAlign: 'center' }}>
+              This is an official HR communication. Please do not reply to this email.<br />
+              © {new Date().getFullYear()} {companyName} · Human Resources Department · All Rights Reserved
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  )
+}
 
-        {/* Amount */}
-        <div className="text-center">
-          <p className={`font-black ${compact ? 'text-4xl' : 'text-5xl'}`}>
-            ${amount.toFixed(2)}
-          </p>
-          {message && (
-            <p className={`mt-1 opacity-80 italic ${compact ? 'text-xs' : 'text-sm'} line-clamp-2`}>
-              "{message}"
-            </p>
-          )}
-        </div>
+// Keep the old compact credit-card style for the customizer download feature
+export function GiftCardCompactCard({
+  template,
+  amount = 50,
+  occasion = 'Birthday',
+  message,
+  recipientName = 'John Doe',
+  senderName = 'The HR Team',
+  logoOption = 'none' as LogoOption,
+}: Omit<GiftCardPreviewProps, 'compact'>) {
+  const design = template?.designData || defaultDesign
+  const primaryColor = design.backgroundColor || defaultDesign.backgroundColor
+  const accentColor = design.accentColor || defaultDesign.accentColor
 
-        {/* Footer */}
-        <div className="flex items-end justify-between">
+  return (
+    <div
+      style={{
+        width: '340px',
+        height: '214px',
+        minWidth: '340px',
+        borderRadius: design.borderRadius || '8px',
+        background: design.backgroundImage ? undefined : primaryColor,
+        position: 'relative',
+        overflow: 'hidden',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+        fontFamily: 'Arial, sans-serif',
+      }}
+    >
+      {design.backgroundImage && (
+        <img src={design.backgroundImage} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} crossOrigin="anonymous" />
+      )}
+      {design.backgroundImage && <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)' }} />}
+      {!design.backgroundImage && (
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: `radial-gradient(circle at 20% 80%, ${accentColor} 0%, transparent 50%), radial-gradient(circle at 80% 20%, white 0%, transparent 50%)`, opacity: 0.12 }} />
+      )}
+      <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '20px', color: '#ffffff' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
-            <p className="text-xs opacity-60">To</p>
-            <p className={`font-semibold ${compact ? 'text-xs' : 'text-sm'}`}>{recipientName}</p>
+            <div style={{ fontSize: '9px', opacity: 0.7, textTransform: 'uppercase', letterSpacing: '2px' }}>HR Gift Voucher</div>
+            <div style={{ fontSize: '16px', fontWeight: 700 }}>{occasion}</div>
           </div>
-          <div className="text-right">
-            <p className="text-xs opacity-60">From</p>
-            <p className={`font-semibold ${compact ? 'text-xs' : 'text-sm'}`}>{senderName}</p>
+          <div style={{ background: accentColor, borderRadius: '20px', padding: '3px 10px', fontSize: '10px', fontWeight: 700, color: '#1F2937' }}>
+            {logoOption !== 'none' ? logoOption.toUpperCase() : 'GIFT'}
+          </div>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '44px', fontWeight: 900 }}>${amount.toFixed(2)}</div>
+          {message && <div style={{ fontSize: '12px', opacity: 0.8, fontStyle: 'italic', marginTop: '4px' }}>"{message}"</div>}
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+          <div>
+            <div style={{ fontSize: '9px', opacity: 0.6 }}>To</div>
+            <div style={{ fontSize: '12px', fontWeight: 600 }}>{recipientName}</div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '9px', opacity: 0.6 }}>From</div>
+            <div style={{ fontSize: '12px', fontWeight: 600 }}>{senderName}</div>
           </div>
         </div>
       </div>

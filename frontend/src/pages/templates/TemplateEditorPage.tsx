@@ -24,7 +24,7 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-const CATEGORIES = ['Birthday', 'Anniversary', 'Holiday', 'Achievement', 'Appreciation', 'Onboarding', 'Other']
+const CATEGORIES = ['Birthday', 'Work Anniversary', 'Holiday', 'Performance Recognition', 'Thank You', 'New Employee Welcome', 'Congratulations', 'Farewell Message', 'Other']
 
 export default function TemplateEditorPage() {
   const { id } = useParams()
@@ -41,10 +41,10 @@ export default function TemplateEditorPage() {
     defaultValues: {
       name: '',
       category: 'Birthday',
-      backgroundColor: '#4F46E5',
+      backgroundColor: '#1E3A5F',
       textColor: '#FFFFFF',
       accentColor: '#F59E0B',
-      borderRadius: '16px',
+      borderRadius: '8px',
     },
   })
 
@@ -158,9 +158,9 @@ export default function TemplateEditorPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
-            {isEditing ? 'Edit Template' : 'Create Template'}
+            {isEditing ? 'Edit HR Email Template' : 'Create HR Email Template'}
           </h1>
-          <p className="text-gray-500 mt-1">Customize your gift card design</p>
+          <p className="text-gray-500 mt-1">Customize your professional HR email template design</p>
         </div>
         <div className="flex gap-3">
           <Button variant="outline" leftIcon={<X size={16} />} onClick={() => navigate('/templates')}>

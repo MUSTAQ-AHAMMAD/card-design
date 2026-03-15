@@ -1,6 +1,7 @@
 import { Edit2, Trash2, Eye } from 'lucide-react'
 import type { Template } from '../../types'
 import { Badge } from '../ui/Badge'
+import { GiftCardPreview } from './GiftCardPreview'
 
 interface TemplateCardProps {
   template: Template
@@ -11,39 +12,31 @@ interface TemplateCardProps {
 }
 
 export function TemplateCard({ template, onEdit, onDelete, onSelect, selected }: TemplateCardProps) {
-  const design = template.designData
-
   return (
     <div
       className={`group relative bg-white rounded-xl border-2 overflow-hidden cursor-pointer transition-all duration-200
         ${selected ? 'border-indigo-500 shadow-lg shadow-indigo-100' : 'border-gray-200 hover:border-indigo-300 hover:shadow-md'}`}
       onClick={onSelect}
     >
-      {/* Preview */}
-      <div
-        className="h-32 relative overflow-hidden"
-        style={{ background: design.backgroundColor || '#4F46E5' }}
-      >
+      {/* Email template thumbnail preview */}
+      <div className="h-32 relative overflow-hidden bg-gray-50 flex items-center justify-center">
         <div
-          className="absolute inset-0 opacity-10"
-          style={{
-            backgroundImage: `radial-gradient(circle at 80% 20%, white 0%, transparent 50%)`,
-          }}
-        />
-        <div
-          className="absolute -top-4 -right-4 w-20 h-20 rounded-full opacity-20"
-          style={{ background: design.accentColor || '#F59E0B' }}
-        />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span
-            className="text-2xl font-black opacity-40"
-            style={{ color: design.textColor || '#FFFFFF' }}
-          >
-            GIFT
-          </span>
+          className="origin-top-left pointer-events-none"
+          style={{ transform: 'scale(0.22)', transformOrigin: 'top left', width: '220px', height: '139px', position: 'absolute', top: 0, left: 0 }}
+        >
+          <GiftCardPreview
+            template={template}
+            amount={50}
+            occasion={template.category}
+            message="Your dedication is truly valued."
+            recipientName="Team Member"
+            senderName="HR Team"
+            compact
+          />
         </div>
+
         {selected && (
-          <div className="absolute top-2 right-2 w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center">
+          <div className="absolute top-2 right-2 w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center z-10">
             <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
             </svg>
@@ -52,7 +45,7 @@ export function TemplateCard({ template, onEdit, onDelete, onSelect, selected }:
 
         {/* Hover actions */}
         {(onEdit || onDelete) && (
-          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 z-10">
             {onEdit && (
               <button
                 onClick={(e) => { e.stopPropagation(); onEdit() }}

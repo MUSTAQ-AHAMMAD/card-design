@@ -16,11 +16,11 @@ import toast from 'react-hot-toast'
 import type { Template } from '../../types'
 
 const MOCK_TEMPLATES: Template[] = [
-  { id: '1', name: 'Birthday Celebration', category: 'Birthday', designData: { backgroundColor: '#7C3AED', textColor: '#FFFFFF', accentColor: '#F59E0B', fontFamily: 'Inter', borderRadius: '16px' }, isActive: true, usageCount: 42, createdAt: '', updatedAt: '' },
-  { id: '2', name: 'Work Anniversary', category: 'Anniversary', designData: { backgroundColor: '#059669', textColor: '#FFFFFF', accentColor: '#FCD34D', fontFamily: 'Inter', borderRadius: '16px' }, isActive: true, usageCount: 28, createdAt: '', updatedAt: '' },
-  { id: '3', name: 'Holiday Greetings', category: 'Holiday', designData: { backgroundColor: '#DC2626', textColor: '#FFFFFF', accentColor: '#FCD34D', fontFamily: 'Inter', borderRadius: '16px' }, isActive: true, usageCount: 67, createdAt: '', updatedAt: '' },
-  { id: '4', name: 'Congratulations', category: 'Achievement', designData: { backgroundColor: '#2563EB', textColor: '#FFFFFF', accentColor: '#10B981', fontFamily: 'Inter', borderRadius: '16px' }, isActive: true, usageCount: 15, createdAt: '', updatedAt: '' },
-  { id: '5', name: 'Thank You', category: 'Appreciation', designData: { backgroundColor: '#4F46E5', textColor: '#FFFFFF', accentColor: '#F59E0B', fontFamily: 'Inter', borderRadius: '16px' }, isActive: true, usageCount: 89, createdAt: '', updatedAt: '' },
+  { id: '1', name: 'Birthday Wishes', category: 'Birthday', designData: { backgroundColor: '#7C3AED', textColor: '#FFFFFF', accentColor: '#FCD34D', fontFamily: 'Arial', borderRadius: '8px' }, isActive: true, usageCount: 42, createdAt: '', updatedAt: '' },
+  { id: '2', name: 'Work Anniversary', category: 'Work Anniversary', designData: { backgroundColor: '#1E3A5F', textColor: '#FFFFFF', accentColor: '#F59E0B', fontFamily: 'Arial', borderRadius: '8px' }, isActive: true, usageCount: 28, createdAt: '', updatedAt: '' },
+  { id: '3', name: 'Holiday Greetings', category: 'Holiday', designData: { backgroundColor: '#B91C1C', textColor: '#FFFFFF', accentColor: '#FCD34D', fontFamily: 'Arial', borderRadius: '8px' }, isActive: true, usageCount: 67, createdAt: '', updatedAt: '' },
+  { id: '4', name: 'Performance Recognition', category: 'Performance Recognition', designData: { backgroundColor: '#1D4ED8', textColor: '#FFFFFF', accentColor: '#34D399', fontFamily: 'Arial', borderRadius: '8px' }, isActive: true, usageCount: 15, createdAt: '', updatedAt: '' },
+  { id: '5', name: 'Employee Appreciation', category: 'Thank You', designData: { backgroundColor: '#065F46', textColor: '#FFFFFF', accentColor: '#FCD34D', fontFamily: 'Arial', borderRadius: '8px' }, isActive: true, usageCount: 89, createdAt: '', updatedAt: '' },
 ]
 
 const customizeSchema = z.object({
@@ -36,7 +36,7 @@ type CustomizeForm = z.infer<typeof customizeSchema>
 const STEPS = ['Choose Template', 'Customize', 'Preview', 'Send']
 
 const PRESET_AMOUNTS = [25, 50, 100, 150, 200]
-const OCCASIONS = ['Birthday', 'Work Anniversary', 'Holiday', 'Congratulations', 'Thank You', 'Welcome', 'Other']
+const OCCASIONS = ['Birthday', 'Work Anniversary', 'Holiday', 'Congratulations', 'Thank You', 'New Employee Welcome', 'Performance Recognition', 'Team Achievement', 'Farewell Message', 'Other']
 
 export default function GiftCardCreatorPage() {
   const { user } = useAuth()
@@ -108,8 +108,8 @@ export default function GiftCardCreatorPage() {
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Create Gift Card</h1>
-        <p className="text-gray-500 mt-1">Send a personalized gift card to a colleague</p>
+        <h1 className="text-2xl font-bold text-gray-900">Send HR Gift Email</h1>
+        <p className="text-gray-500 mt-1">Send a professional HR gift email to a colleague</p>
       </div>
 
       {/* Progress */}
