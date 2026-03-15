@@ -9,7 +9,13 @@ import { Button } from '../../components/ui/Button'
 import { Badge } from '../../components/ui/Badge'
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner'
 import { format } from 'date-fns'
-import type { DashboardStats } from '../../types'
+import type { ApiResponse, DashboardStats } from '../../types'
+
+interface BackendDashboardData {
+  totalGiftCards?: number
+  totalUsers?: number
+  giftCardsByStatus?: Record<string, number>
+}
 
 const MOCK_STATS: DashboardStats = {
   totalGiftCards: 248,
@@ -51,7 +57,15 @@ export default function DashboardPage() {
 
   useEffect(() => {
     analyticsApi.getDashboard()
-      .then((res) => setStats(res.data))
+      .then((res) => {
+        const apiData = (res.data as unknown as ApiResponse<BackendDashboardData>).data
+        setStats({
+          ...MOCK_STATS,
+          totalGiftCards: apiData?.totalGiftCards ?? MOCK_STATS.totalGiftCards,
+          sentThisMonth: apiData?.giftCardsByStatus?.['SENT'] ?? MOCK_STATS.sentThisMonth,
+          activeUsers: apiData?.totalUsers ?? MOCK_STATS.activeUsers,
+        })
+      })
       .catch(() => setStats(MOCK_STATS))
       .finally(() => setLoading(false))
   }, [])
