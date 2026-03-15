@@ -13,15 +13,17 @@ import toast from 'react-hot-toast'
 import type { Template } from '../../types'
 
 const MOCK_TEMPLATES: Template[] = [
-  { id: '1', name: 'Birthday Celebration', category: 'Birthday', designData: { backgroundColor: '#7C3AED', textColor: '#FFFFFF', accentColor: '#F59E0B', fontFamily: 'Inter', borderRadius: '16px' }, isActive: true, usageCount: 42, createdAt: '', updatedAt: '' },
-  { id: '2', name: 'Work Anniversary', category: 'Anniversary', designData: { backgroundColor: '#059669', textColor: '#FFFFFF', accentColor: '#FCD34D', fontFamily: 'Inter', borderRadius: '16px' }, isActive: true, usageCount: 28, createdAt: '', updatedAt: '' },
-  { id: '3', name: 'Holiday Greetings', category: 'Holiday', designData: { backgroundColor: '#DC2626', textColor: '#FFFFFF', accentColor: '#FCD34D', fontFamily: 'Inter', borderRadius: '16px' }, isActive: true, usageCount: 67, createdAt: '', updatedAt: '' },
-  { id: '4', name: 'Congratulations', category: 'Achievement', designData: { backgroundColor: '#2563EB', textColor: '#FFFFFF', accentColor: '#10B981', fontFamily: 'Inter', borderRadius: '16px' }, isActive: true, usageCount: 15, createdAt: '', updatedAt: '' },
-  { id: '5', name: 'Thank You', category: 'Appreciation', designData: { backgroundColor: '#4F46E5', textColor: '#FFFFFF', accentColor: '#F59E0B', fontFamily: 'Inter', borderRadius: '16px' }, isActive: true, usageCount: 89, createdAt: '', updatedAt: '' },
-  { id: '6', name: 'Welcome Aboard', category: 'Onboarding', designData: { backgroundColor: '#0E7490', textColor: '#FFFFFF', accentColor: '#FDE68A', fontFamily: 'Inter', borderRadius: '16px' }, isActive: true, usageCount: 33, createdAt: '', updatedAt: '' },
+  { id: '1', name: 'Birthday Wishes', category: 'Birthday', designData: { backgroundColor: '#7C3AED', textColor: '#FFFFFF', accentColor: '#FCD34D', fontFamily: 'Arial', borderRadius: '8px' }, isActive: true, usageCount: 42, createdAt: '', updatedAt: '' },
+  { id: '2', name: 'Work Anniversary', category: 'Work Anniversary', designData: { backgroundColor: '#1E3A5F', textColor: '#FFFFFF', accentColor: '#F59E0B', fontFamily: 'Arial', borderRadius: '8px' }, isActive: true, usageCount: 28, createdAt: '', updatedAt: '' },
+  { id: '3', name: 'Holiday Greetings', category: 'Holiday', designData: { backgroundColor: '#B91C1C', textColor: '#FFFFFF', accentColor: '#FCD34D', fontFamily: 'Arial', borderRadius: '8px' }, isActive: true, usageCount: 67, createdAt: '', updatedAt: '' },
+  { id: '4', name: 'Performance Recognition', category: 'Performance Recognition', designData: { backgroundColor: '#1D4ED8', textColor: '#FFFFFF', accentColor: '#34D399', fontFamily: 'Arial', borderRadius: '8px' }, isActive: true, usageCount: 15, createdAt: '', updatedAt: '' },
+  { id: '5', name: 'Employee Appreciation', category: 'Thank You', designData: { backgroundColor: '#065F46', textColor: '#FFFFFF', accentColor: '#FCD34D', fontFamily: 'Arial', borderRadius: '8px' }, isActive: true, usageCount: 89, createdAt: '', updatedAt: '' },
+  { id: '6', name: 'New Employee Welcome', category: 'New Employee Welcome', designData: { backgroundColor: '#0E7490', textColor: '#FFFFFF', accentColor: '#FDE68A', fontFamily: 'Arial', borderRadius: '8px' }, isActive: true, usageCount: 33, createdAt: '', updatedAt: '' },
+  { id: '7', name: 'Congratulations', category: 'Congratulations', designData: { backgroundColor: '#92400E', textColor: '#FFFFFF', accentColor: '#FCD34D', fontFamily: 'Arial', borderRadius: '8px' }, isActive: true, usageCount: 21, createdAt: '', updatedAt: '' },
+  { id: '8', name: 'Farewell & Best Wishes', category: 'Farewell Message', designData: { backgroundColor: '#374151', textColor: '#FFFFFF', accentColor: '#F9A8D4', fontFamily: 'Arial', borderRadius: '8px' }, isActive: true, usageCount: 12, createdAt: '', updatedAt: '' },
 ]
 
-const CATEGORIES = ['All', 'Birthday', 'Anniversary', 'Holiday', 'Achievement', 'Appreciation', 'Onboarding']
+const CATEGORIES = ['All', 'Birthday', 'Work Anniversary', 'Holiday', 'Performance Recognition', 'Thank You', 'New Employee Welcome', 'Congratulations', 'Farewell Message']
 
 export default function TemplatesPage() {
   const { user } = useAuth()
@@ -68,8 +70,8 @@ export default function TemplatesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Templates</h1>
-          <p className="text-gray-500 mt-1">Manage your gift card design templates</p>
+          <h1 className="text-2xl font-bold text-gray-900">HR Email Templates</h1>
+          <p className="text-gray-500 mt-1">Manage professional HR communication email templates</p>
         </div>
         {isAdminOrHR && (
           <Link to="/templates/new">

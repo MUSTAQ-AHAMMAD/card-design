@@ -5,7 +5,7 @@ import { jsPDF } from 'jspdf'
 import { Modal } from '../ui/Modal'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
-import { GiftCardPreview, type LogoOption } from './GiftCardPreview'
+import { GiftCardPreview, GiftCardCompactCard, type LogoOption } from './GiftCardPreview'
 import type { GiftCard } from '../../types'
 import toast from 'react-hot-toast'
 
@@ -29,13 +29,13 @@ export function GiftCardCustomizerModal({ isOpen, onClose, card }: GiftCardCusto
   const [recipientName, setRecipientName] = useState(card.recipientName || '')
   const [logoOption, setLogoOption] = useState<LogoOption>('none')
   const [downloading, setDownloading] = useState<'jpeg' | 'pdf' | null>(null)
-  const previewRef = useRef<HTMLDivElement>(null)
+  const downloadRef = useRef<HTMLDivElement>(null)
 
   const hasUploadedDesign = !!card.template?.designData?.backgroundImage
 
   const captureCard = async (): Promise<HTMLCanvasElement> => {
-    if (!previewRef.current) throw new Error('Preview not available')
-    return html2canvas(previewRef.current, {
+    if (!downloadRef.current) throw new Error('Preview not available')
+    return html2canvas(downloadRef.current, {
       scale: 3,
       useCORS: true,
       backgroundColor: null,
@@ -64,8 +64,6 @@ export function GiftCardCustomizerModal({ isOpen, onClose, card }: GiftCardCusto
     try {
       const canvas = await captureCard()
       const imgData = canvas.toDataURL('image/jpeg', 0.95)
-      // Use a wide landscape PDF page that matches the card's 1.586:1 aspect ratio (credit card standard)
-      // A5 landscape width (148mm) is chosen as a convenient print-ready size
       const pdfWidth = 148
       const pdfHeight = pdfWidth / 1.586
       const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [pdfWidth, pdfHeight] })
@@ -80,81 +78,85 @@ export function GiftCardCustomizerModal({ isOpen, onClose, card }: GiftCardCusto
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Customize Your Gift Card" size="xl">
-      <div className="flex flex-col lg:flex-row gap-6">
+    <Modal isOpen={isOpen} onClose={onClose} title="Your HR Gift Email" size="xl">
+      <div className="flex flex-col gap-6">
         {/* Editor panel */}
-        <div className="flex-1 space-y-5">
-          {/* HR-uploaded design badge */}
-          {hasUploadedDesign && (
-            <div className="flex items-center gap-2 px-3 py-2 bg-indigo-50 border border-indigo-200 rounded-lg text-sm text-indigo-700">
-              <ImagePlus size={15} className="shrink-0" />
-              <span>This card uses a custom design uploaded by HR. Personalize it below.</span>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1 space-y-4">
+            {/* HR-uploaded design badge */}
+            {hasUploadedDesign && (
+              <div className="flex items-center gap-2 px-3 py-2 bg-indigo-50 border border-indigo-200 rounded-lg text-sm text-indigo-700">
+                <ImagePlus size={15} className="shrink-0" />
+                <span>This email uses a custom design uploaded by HR.</span>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Your Name on Card</label>
+              <Input
+                placeholder="Enter your name"
+                value={recipientName}
+                onChange={(e) => setRecipientName(e.target.value)}
+              />
             </div>
-          )}
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Your Name on Card</label>
-            <Input
-              placeholder="Enter your name"
-              value={recipientName}
-              onChange={(e) => setRecipientName(e.target.value)}
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Card Logo Style</label>
+              <div className="grid grid-cols-4 gap-2">
+                {LOGO_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setLogoOption(opt.value)}
+                    className={`flex flex-col items-center gap-1 p-2 rounded-xl border-2 text-xs font-medium transition-all
+                      ${logoOption === opt.value
+                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                        : 'border-gray-200 text-gray-600 hover:border-indigo-300 hover:bg-gray-50'
+                      }`}
+                  >
+                    <span className="text-xl leading-none">{opt.emoji}</span>
+                    <span>{opt.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Select Logo</label>
-            <div className="grid grid-cols-4 gap-2">
-              {LOGO_OPTIONS.map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => setLogoOption(opt.value)}
-                  className={`flex flex-col items-center gap-1 p-2 rounded-xl border-2 text-xs font-medium transition-all
-                    ${logoOption === opt.value
-                      ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                      : 'border-gray-200 text-gray-600 hover:border-indigo-300 hover:bg-gray-50'
-                    }`}
+            {/* Download actions (compact card style) */}
+            <div className="pt-2 space-y-2">
+              <p className="text-sm font-medium text-gray-700">Download Gift Voucher Card</p>
+              <p className="text-xs text-gray-400">Downloads a compact gift voucher card image for print or attachment</p>
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  leftIcon={<ImageIcon size={16} />}
+                  loading={downloading === 'jpeg'}
+                  disabled={!!downloading}
+                  onClick={handleDownloadJPEG}
                 >
-                  <span className="text-xl leading-none">{opt.emoji}</span>
-                  <span>{opt.label}</span>
-                </button>
-              ))}
+                  Download JPEG
+                </Button>
+                <Button
+                  variant="secondary"
+                  className="flex-1"
+                  leftIcon={<FileText size={16} />}
+                  loading={downloading === 'pdf'}
+                  disabled={!!downloading}
+                  onClick={handleDownloadPDF}
+                >
+                  Download PDF
+                </Button>
+              </div>
             </div>
           </div>
 
-          {/* Download actions */}
-          <div className="pt-2 space-y-2">
-            <p className="text-sm font-medium text-gray-700">Download</p>
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                className="flex-1"
-                leftIcon={<ImageIcon size={16} />}
-                loading={downloading === 'jpeg'}
-                disabled={!!downloading}
-                onClick={handleDownloadJPEG}
-              >
-                Download JPEG
-              </Button>
-              <Button
-                variant="secondary"
-                className="flex-1"
-                leftIcon={<FileText size={16} />}
-                loading={downloading === 'pdf'}
-                disabled={!!downloading}
-                onClick={handleDownloadPDF}
-              >
-                Download PDF
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Card preview */}
-        <div className="flex flex-col items-center gap-3">
-          <p className="text-sm font-medium text-gray-500 self-start">Live Preview</p>
-          <div ref={previewRef} className="inline-flex">
-            <GiftCardPreview
+          {/* Hidden compact card for download only */}
+          <div
+            ref={downloadRef}
+            style={{ position: 'fixed', top: '-9999px', left: '-9999px', pointerEvents: 'none' }}
+            aria-hidden="true"
+          >
+            <GiftCardCompactCard
               template={card.template}
               amount={card.amount}
               occasion={card.occasion}
@@ -163,8 +165,23 @@ export function GiftCardCustomizerModal({ isOpen, onClose, card }: GiftCardCusto
               logoOption={logoOption}
             />
           </div>
-          <p className="text-xs text-gray-400 text-center max-w-xs">
-            Edit your name and pick a logo above — the preview updates in real time.
+        </div>
+
+        {/* Email template preview */}
+        <div>
+          <p className="text-sm font-medium text-gray-500 mb-3">Email Preview</p>
+          <div className="overflow-x-auto">
+            <GiftCardPreview
+              template={card.template}
+              amount={card.amount}
+              occasion={card.occasion}
+              message={card.personalMessage}
+              recipientName={recipientName || card.recipientName || 'Your Name'}
+              senderName="HR Team"
+            />
+          </div>
+          <p className="text-xs text-gray-400 mt-2">
+            This is how your HR email will appear to the recipient.
           </p>
         </div>
       </div>
