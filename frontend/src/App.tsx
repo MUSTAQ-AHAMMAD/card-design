@@ -1,22 +1,23 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
+import { Suspense, lazy } from 'react'
 import { AuthProvider } from './context/AuthContext'
 import { useAuth } from './hooks/useAuth'
 import { Layout } from './components/Layout/Layout'
 import { PageLoader } from './components/ui/LoadingSpinner'
 
-import LoginPage from './pages/auth/LoginPage'
-import RegisterPage from './pages/auth/RegisterPage'
-import DashboardPage from './pages/dashboard/DashboardPage'
-import TemplatesPage from './pages/templates/TemplatesPage'
-import TemplateEditorPage from './pages/templates/TemplateEditorPage'
-import GiftCardsPage from './pages/gift-cards/GiftCardsPage'
-import GiftCardCreatorPage from './pages/gift-cards/GiftCardCreatorPage'
-import BulkGiftCardPage from './pages/gift-cards/BulkGiftCardPage'
-import EmailTemplatesPage from './pages/email/EmailTemplatesPage'
-import AdminPanel from './pages/admin/AdminPanel'
-import EmployeeDashboard from './pages/employee/EmployeeDashboard'
-import SettingsPage from './pages/settings/SettingsPage'
+const LoginPage = lazy(() => import('./pages/auth/LoginPage'))
+const RegisterPage = lazy(() => import('./pages/auth/RegisterPage'))
+const DashboardPage = lazy(() => import('./pages/dashboard/DashboardPage'))
+const TemplatesPage = lazy(() => import('./pages/templates/TemplatesPage'))
+const TemplateEditorPage = lazy(() => import('./pages/templates/TemplateEditorPage'))
+const GiftCardsPage = lazy(() => import('./pages/gift-cards/GiftCardsPage'))
+const GiftCardCreatorPage = lazy(() => import('./pages/gift-cards/GiftCardCreatorPage'))
+const BulkGiftCardPage = lazy(() => import('./pages/gift-cards/BulkGiftCardPage'))
+const EmailTemplatesPage = lazy(() => import('./pages/email/EmailTemplatesPage'))
+const AdminPanel = lazy(() => import('./pages/admin/AdminPanel'))
+const EmployeeDashboard = lazy(() => import('./pages/employee/EmployeeDashboard'))
+const SettingsPage = lazy(() => import('./pages/settings/SettingsPage'))
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -46,6 +47,7 @@ function RootRedirect() {
 
 function AppRoutes() {
   return (
+    <Suspense fallback={<PageLoader />}>
     <Routes>
       {/* Public */}
       <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
@@ -76,6 +78,7 @@ function AppRoutes() {
       {/* Catch-all */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </Suspense>
   )
 }
 
