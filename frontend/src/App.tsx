@@ -5,6 +5,7 @@ import { AuthProvider } from './context/AuthContext'
 import { useAuth } from './hooks/useAuth'
 import { Layout } from './components/Layout/Layout'
 import { PageLoader } from './components/ui/LoadingSpinner'
+import { ErrorBoundary } from './components/ui/ErrorBoundary'
 
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'))
 const RegisterPage = lazy(() => import('./pages/auth/RegisterPage'))
@@ -86,7 +87,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes />
+        <ErrorBoundary>
+          <AppRoutes />
+        </ErrorBoundary>
         <Toaster
           position="top-right"
           toastOptions={{

@@ -10,7 +10,7 @@ import { GiftCardCustomizerModal } from '../../components/GiftCard/GiftCardCusto
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner'
 import { Plus, History, Pencil } from 'lucide-react'
 import { format } from 'date-fns'
-import type { GiftCard, GiftCardStatus } from '../../types'
+import type { ApiResponse, GiftCard, GiftCardStatus } from '../../types'
 
 const MOCK_CARDS: GiftCard[] = [
   { id: '1', code: 'GC-001', amount: 50, occasion: 'Birthday', personalMessage: 'Happy Birthday! 🎂', status: 'RECEIVED', recipientEmail: 'me@example.com', recipientName: 'Me', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
@@ -34,7 +34,10 @@ export default function EmployeeDashboard() {
 
   useEffect(() => {
     giftCardsApi.getHistory()
-      .then((res) => setCards(res.data.length ? res.data : MOCK_CARDS))
+      .then((res) => {
+        const data = (res.data as unknown as ApiResponse<GiftCard[]>).data ?? []
+        setCards(data.length ? data : MOCK_CARDS)
+      })
       .catch(() => setCards(MOCK_CARDS))
       .finally(() => setLoading(false))
   }, [])
