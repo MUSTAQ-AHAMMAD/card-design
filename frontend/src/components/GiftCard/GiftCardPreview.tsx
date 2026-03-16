@@ -46,6 +46,7 @@ const defaultDesign = {
   backgroundColor: '#1E3A5F',
   textColor: '#FFFFFF',
   accentColor: '#F59E0B',
+  fontFamily: 'Arial',
   borderRadius: '8px',
   backgroundImage: undefined as string | undefined,
 }
@@ -58,7 +59,6 @@ export function GiftCardPreview({
   recipientName = 'John Doe',
   senderName = 'The HR Team',
   compact = false,
-  logoOption = 'none',
   companyName = 'CorpHR™ Connect',
 }: GiftCardPreviewProps) {
   const design = template?.designData || defaultDesign
@@ -140,7 +140,7 @@ export function GiftCardPreview({
       style={{
         width: '520px',
         minWidth: '520px',
-        fontFamily: 'Arial, Helvetica, sans-serif',
+        fontFamily: design.fontFamily ? `${design.fontFamily}, Arial, sans-serif` : 'Arial, Helvetica, sans-serif',
         background: '#f1f5f9',
         borderRadius: '8px',
         overflow: 'hidden',
