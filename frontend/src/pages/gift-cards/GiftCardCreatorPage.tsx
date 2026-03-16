@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Check, ChevronRight, Send } from 'lucide-react'
+import { Check, ChevronRight, Send, Pencil } from 'lucide-react'
 import { templatesApi, giftCardsApi } from '../../services/api'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
@@ -61,6 +61,7 @@ export default function GiftCardCreatorPage() {
   const [accentColor, setAccentColor] = useState('')
   const [textColor, setTextColor] = useState('')
   const [fontFamily, setFontFamily] = useState('Arial')
+  // Default company name shown on the gift card header — can be changed by the user in the Customize step
   const [companyName, setCompanyName] = useState('CorpHR™ Connect')
 
   const { control, register, handleSubmit, watch, setValue, formState: { errors } } = useForm<CustomizeForm>({
@@ -146,9 +147,16 @@ export default function GiftCardCreatorPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Send HR Gift Email</h1>
-        <p className="text-gray-500 mt-1">Send a professional HR gift email to a colleague</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Send HR Gift Email</h1>
+          <p className="text-gray-500 mt-1">Send a professional HR gift email to a colleague</p>
+        </div>
+        <Link to="/gift-cards/designer">
+          <Button variant="outline" size="sm" leftIcon={<Pencil size={15} />}>
+            Open Canvas Designer
+          </Button>
+        </Link>
       </div>
 
       {/* Progress */}

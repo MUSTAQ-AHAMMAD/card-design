@@ -14,6 +14,7 @@ const TemplatesPage = lazy(() => import('./pages/templates/TemplatesPage'))
 const TemplateEditorPage = lazy(() => import('./pages/templates/TemplateEditorPage'))
 const GiftCardsPage = lazy(() => import('./pages/gift-cards/GiftCardsPage'))
 const GiftCardCreatorPage = lazy(() => import('./pages/gift-cards/GiftCardCreatorPage'))
+const GiftCardEditorPage = lazy(() => import('./pages/gift-cards/GiftCardEditorPage'))
 const BulkGiftCardPage = lazy(() => import('./pages/gift-cards/BulkGiftCardPage'))
 const EmailTemplatesPage = lazy(() => import('./pages/email/EmailTemplatesPage'))
 const AdminPanel = lazy(() => import('./pages/admin/AdminPanel'))
@@ -66,6 +67,7 @@ function AppRoutes() {
         } />
         <Route path="/gift-cards" element={<GiftCardsPage />} />
         <Route path="/gift-cards/create" element={<GiftCardCreatorPage />} />
+        <Route path="/gift-cards/designer" element={<GiftCardEditorPage />} />
         <Route path="/gift-cards/bulk-send" element={
           <AdminOrHRRoute><BulkGiftCardPage /></AdminOrHRRoute>
         } />

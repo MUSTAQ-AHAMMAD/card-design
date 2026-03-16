@@ -36,6 +36,7 @@ const FONT_OPTIONS = [
 export function GiftCardCustomizerModal({ isOpen, onClose, card }: GiftCardCustomizerModalProps) {
   const [recipientName, setRecipientName] = useState(card.recipientName || '')
   const [personalMessage, setPersonalMessage] = useState(card.personalMessage || '')
+  // Default company name shown in the email header — editable by the user in the modal
   const [companyName, setCompanyName] = useState('CorpHR™ Connect')
   const [logoOption, setLogoOption] = useState<LogoOption>('none')
   const [backgroundColor, setBackgroundColor] = useState(
