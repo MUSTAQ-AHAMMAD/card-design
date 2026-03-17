@@ -6,7 +6,7 @@ const userController_1 = require("../controllers/userController");
 const auth_1 = require("../middleware/auth");
 const validate_1 = require("../middleware/validate");
 const router = (0, express_1.Router)();
-router.get('/', auth_1.requireAdmin, userController_1.getUsers);
+router.get('/', auth_1.requireHROrAdmin, userController_1.getUsers);
 router.get('/profile', userController_1.getProfile);
 router.put('/profile', [
     (0, express_validator_1.body)('firstName').optional().trim().notEmpty().withMessage('First name cannot be empty'),

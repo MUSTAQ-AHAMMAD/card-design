@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, Search, Filter, Users } from 'lucide-react'
+import { Plus, Search, Filter, Users, Pencil } from 'lucide-react'
 import { giftCardsApi } from '../../services/api'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
@@ -68,6 +68,9 @@ export default function GiftCardsPage() {
               <Button variant="outline" leftIcon={<Users size={16} />}>Bulk Send</Button>
             </Link>
           )}
+          <Link to="/gift-cards/designer">
+            <Button variant="outline" leftIcon={<Pencil size={16} />}>Open Designer</Button>
+          </Link>
           <Link to="/gift-cards/create">
             <Button leftIcon={<Plus size={16} />}>Create Gift Card</Button>
           </Link>

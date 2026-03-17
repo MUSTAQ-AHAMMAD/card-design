@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Check, ChevronRight, Send } from 'lucide-react'
+import { Check, ChevronRight, Send, Pencil } from 'lucide-react'
 import { templatesApi, giftCardsApi } from '../../services/api'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
@@ -38,6 +38,14 @@ const STEPS = ['Choose Template', 'Customize', 'Preview', 'Send']
 const PRESET_AMOUNTS = [25, 50, 100, 150, 200]
 const OCCASIONS = ['Birthday', 'Work Anniversary', 'Holiday', 'Congratulations', 'Thank You', 'New Employee Welcome', 'Performance Recognition', 'Team Achievement', 'Farewell Message', 'Other']
 
+const FONT_OPTIONS = [
+  { value: 'Arial', label: 'Arial' },
+  { value: 'Georgia', label: 'Georgia' },
+  { value: 'Trebuchet MS', label: 'Trebuchet MS' },
+  { value: 'Verdana', label: 'Verdana' },
+  { value: 'Times New Roman', label: 'Times New Roman' },
+]
+
 export default function GiftCardCreatorPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -47,6 +55,14 @@ export default function GiftCardCreatorPage() {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null)
   const [sending, setSending] = useState(false)
   const [createdCardId, setCreatedCardId] = useState<string | null>(null)
+
+  // Design customization overrides
+  const [backgroundColor, setBackgroundColor] = useState('')
+  const [accentColor, setAccentColor] = useState('')
+  const [textColor, setTextColor] = useState('')
+  const [fontFamily, setFontFamily] = useState('Arial')
+  // Default company name shown on the gift card header — can be changed by the user in the Customize step
+  const [companyName, setCompanyName] = useState('CorpHR™ Connect')
 
   const { control, register, handleSubmit, watch, setValue, formState: { errors } } = useForm<CustomizeForm>({
     resolver: zodResolver(customizeSchema),
@@ -61,6 +77,30 @@ export default function GiftCardCreatorPage() {
       .catch(() => setTemplates(MOCK_TEMPLATES))
       .finally(() => setLoadingTemplates(false))
   }, [])
+
+  // Sync design overrides when a template is selected
+  useEffect(() => {
+    if (selectedTemplate) {
+      setBackgroundColor(selectedTemplate.designData.backgroundColor || '#1E3A5F')
+      setAccentColor(selectedTemplate.designData.accentColor || '#F59E0B')
+      setTextColor(selectedTemplate.designData.textColor || '#FFFFFF')
+      setFontFamily(selectedTemplate.designData.fontFamily || 'Arial')
+    }
+  }, [selectedTemplate])
+
+  // Build a customized template merging selected template with user overrides
+  const customizedTemplate: Template | null = selectedTemplate
+    ? {
+        ...selectedTemplate,
+        designData: {
+          ...selectedTemplate.designData,
+          backgroundColor: backgroundColor || selectedTemplate.designData.backgroundColor,
+          accentColor: accentColor || selectedTemplate.designData.accentColor,
+          textColor: textColor || selectedTemplate.designData.textColor,
+          fontFamily,
+        },
+      }
+    : null
 
   const handleCustomize = handleSubmit(async (data) => {
     setSending(true)
@@ -107,9 +147,16 @@ export default function GiftCardCreatorPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Send HR Gift Email</h1>
-        <p className="text-gray-500 mt-1">Send a professional HR gift email to a colleague</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Send HR Gift Email</h1>
+          <p className="text-gray-500 mt-1">Send a professional HR gift email to a colleague</p>
+        </div>
+        <Link to="/gift-cards/designer">
+          <Button variant="outline" size="sm" leftIcon={<Pencil size={15} />}>
+            Open Canvas Designer
+          </Button>
+        </Link>
       </div>
 
       {/* Progress */}
@@ -237,6 +284,66 @@ export default function GiftCardCreatorPage() {
                   {...register('message')}
                 />
               </div>
+
+              {/* Design customization */}
+              <div className="border-t border-gray-100 pt-4 space-y-4">
+                <h3 className="text-sm font-semibold text-gray-800">Design Customization</h3>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-sm font-medium text-gray-700">Company Name</label>
+                  <Input
+                    placeholder="e.g. CorpHR™ Connect"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Card Colors</label>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-xs text-gray-500">Background</span>
+                      <input
+                        type="color"
+                        value={backgroundColor}
+                        onChange={(e) => setBackgroundColor(e.target.value)}
+                        className="h-9 w-full rounded-lg cursor-pointer border border-gray-300"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-xs text-gray-500">Accent</span>
+                      <input
+                        type="color"
+                        value={accentColor}
+                        onChange={(e) => setAccentColor(e.target.value)}
+                        className="h-9 w-full rounded-lg cursor-pointer border border-gray-300"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-xs text-gray-500">Text</span>
+                      <input
+                        type="color"
+                        value={textColor}
+                        onChange={(e) => setTextColor(e.target.value)}
+                        className="h-9 w-full rounded-lg cursor-pointer border border-gray-300"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-sm font-medium text-gray-700">Font Style</label>
+                  <select
+                    value={fontFamily}
+                    onChange={(e) => setFontFamily(e.target.value)}
+                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                    {FONT_OPTIONS.map((f) => (
+                      <option key={f.value} value={f.value} style={{ fontFamily: f.value }}>{f.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
             </form>
 
             <div className="flex gap-3 mt-6">
@@ -254,12 +361,13 @@ export default function GiftCardCreatorPage() {
             <h2 className="font-semibold text-gray-900 mb-4">Preview</h2>
             <div className="flex items-center justify-center p-4 bg-gray-100 rounded-xl">
               <GiftCardPreview
-                template={selectedTemplate}
+                template={customizedTemplate}
                 amount={formValues.amount || 50}
                 occasion={formValues.occasion || 'Gift'}
                 message={formValues.message}
                 recipientName={formValues.recipientName || 'Recipient'}
                 senderName={`${user?.firstName} ${user?.lastName}`}
+                companyName={companyName}
               />
             </div>
           </Card>
@@ -272,12 +380,13 @@ export default function GiftCardCreatorPage() {
           <h2 className="font-semibold text-gray-900 mb-6">Preview Your Gift Card</h2>
           <div className="flex flex-col items-center gap-6">
             <GiftCardPreview
-              template={selectedTemplate}
+              template={customizedTemplate}
               amount={formValues.amount || 50}
               occasion={formValues.occasion || 'Gift'}
               message={formValues.message}
               recipientName={formValues.recipientName || 'Recipient'}
               senderName={`${user?.firstName} ${user?.lastName}`}
+              companyName={companyName}
             />
             <div className="text-center max-w-sm">
               <p className="text-gray-600">
