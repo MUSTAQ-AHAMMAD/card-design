@@ -62,6 +62,8 @@ model GiftCard {
   amount         Float
   occasion       String
   message        String?
+  recipientEmail String?
+  recipientName  String?
   status         String     @default("DRAFT")
   sentAt         DateTime?
   scheduledAt    DateTime?

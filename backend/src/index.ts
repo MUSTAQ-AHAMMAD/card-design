@@ -12,6 +12,7 @@ import emailRoutes from './routes/email'
 import analyticsRoutes from './routes/analytics'
 import { authenticate } from './middleware/auth'
 import { errorHandler } from './middleware/errorHandler'
+import { startScheduler } from './services/schedulerService'
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -57,6 +58,7 @@ app.use(errorHandler)
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
+  startScheduler()
 })
 
 export default app

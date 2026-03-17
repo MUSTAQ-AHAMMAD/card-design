@@ -37,7 +37,7 @@ export const listGiftCards = async (req: Request, res: Response, next: NextFunct
 
 export const createGiftCard = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { templateId, customizations, amount, occasion, message, scheduledAt } = req.body
+    const { templateId, customizations, amount, occasion, message, scheduledAt, recipientEmail, recipientName, personalMessage } = req.body
 
     const giftCard = await prisma.giftCard.create({
       data: {
@@ -46,7 +46,9 @@ export const createGiftCard = async (req: Request, res: Response, next: NextFunc
         customizations: typeof customizations === 'string' ? customizations : JSON.stringify(customizations || {}),
         amount: parseFloat(amount),
         occasion,
-        message,
+        message: message || personalMessage || null,
+        recipientEmail: recipientEmail || null,
+        recipientName: recipientName || null,
         scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
         status: 'DRAFT',
       },
@@ -109,7 +111,7 @@ export const updateGiftCard = async (req: Request, res: Response, next: NextFunc
       throw new AppError('Only DRAFT gift cards can be edited', 400)
     }
 
-    const { customizations, amount, occasion, message, scheduledAt, templateId } = req.body
+    const { customizations, amount, occasion, message, scheduledAt, templateId, recipientEmail, recipientName } = req.body
     const updated = await prisma.giftCard.update({
       where: { id: req.params.id },
       data: {
@@ -119,6 +121,8 @@ export const updateGiftCard = async (req: Request, res: Response, next: NextFunc
         ...(occasion && { occasion }),
         ...(message !== undefined && { message }),
         ...(scheduledAt !== undefined && { scheduledAt: scheduledAt ? new Date(scheduledAt) : null }),
+        ...(recipientEmail !== undefined && { recipientEmail: recipientEmail || null }),
+        ...(recipientName !== undefined && { recipientName: recipientName || null }),
       },
       include: {
         template: { select: { id: true, name: true, category: true } },
@@ -150,7 +154,6 @@ export const deleteGiftCard = async (req: Request, res: Response, next: NextFunc
 
 export const sendGiftCard = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { recipientEmail } = req.body
     const user = req.user!
 
     const giftCard = await prisma.giftCard.findFirst({
@@ -166,6 +169,10 @@ export const sendGiftCard = async (req: Request, res: Response, next: NextFuncti
       throw new AppError('Gift card has already been sent', 400)
     }
 
+    // Resolve recipient email: prefer the one from the request body, fall back to the stored one
+    const effectiveRecipientEmail: string = req.body.recipientEmail || giftCard.recipientEmail || ''
+    if (!effectiveRecipientEmail) throw new AppError('Recipient email is required', 400)
+
     let emailStatus = 'SENT'
     let emailError: string | null = null
 
@@ -178,7 +185,7 @@ export const sendGiftCard = async (req: Request, res: Response, next: NextFuncti
           message: giftCard.message,
           employee: giftCard.employee,
         },
-        recipientEmail
+        effectiveRecipientEmail
       )
     } catch (err) {
       emailStatus = 'FAILED'
@@ -199,7 +206,7 @@ export const sendGiftCard = async (req: Request, res: Response, next: NextFuncti
         data: {
           giftCardId: giftCard.id,
           userId: user.id,
-          recipient: recipientEmail,
+          recipient: effectiveRecipientEmail,
           subject: `You've received a ${giftCard.occasion} Gift Card!`,
           status: emailStatus,
           error: emailError,

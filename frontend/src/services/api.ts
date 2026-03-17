@@ -171,7 +171,7 @@ export const giftCardsApi = {
 
   getById: (id: string) => api.get<GiftCard>(`/gift-cards/${id}`),
 
-  create: (data: Partial<GiftCard> & { templateId?: string }) =>
+  create: (data: Partial<GiftCard> & { templateId?: string; scheduledAt?: string; personalMessage?: string }) =>
     api.post<GiftCard>('/gift-cards', data),
 
   update: (id: string, data: Partial<GiftCard>) =>
