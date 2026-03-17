@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Plus, Trash2, Users, Send, ChevronRight, Check, Upload, UserCheck } from 'lucide-react'
+import { Plus, Trash2, Users, Send, ChevronRight, Check, Upload, UserCheck, Clock } from 'lucide-react'
 import { templatesApi, giftCardsApi, usersApi } from '../../services/api'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
@@ -26,6 +26,7 @@ const bulkSchema = z.object({
   amount: z.number().min(1, 'Amount must be at least $1'),
   occasion: z.string().min(1, 'Occasion is required'),
   message: z.string().optional(),
+  scheduledAt: z.string().optional(),
 })
 
 type BulkForm = z.infer<typeof bulkSchema>
@@ -49,6 +50,7 @@ export default function BulkGiftCardPage() {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null)
   const [sending, setSending] = useState(false)
   const [sentCount, setSentCount] = useState(0)
+  const [scheduleMode, setScheduleMode] = useState(false)
 
   // Recipients state
   const [recipients, setRecipients] = useState<Recipient[]>([])
@@ -183,9 +185,14 @@ export default function BulkGiftCardPage() {
       toast.error('Add at least one recipient')
       return
     }
+    if (scheduleMode && !data.scheduledAt) {
+      toast.error('Please select a date and time to schedule the emails')
+      return
+    }
     setSending(true)
     let successCount = 0
     const errors: string[] = []
+    const scheduledAt = scheduleMode && data.scheduledAt ? new Date(data.scheduledAt).toISOString() : undefined
 
     for (const recipient of recipients) {
       try {
@@ -196,10 +203,14 @@ export default function BulkGiftCardPage() {
           recipientEmail: recipient.email,
           recipientName: recipient.name || undefined,
           templateId: selectedTemplate?.id,
+          scheduledAt,
         })
         // Backend wraps response in ApiResponse<GiftCard>
         const cardId = (res.data as unknown as ApiResponse<GiftCard>).data?.id ?? (res.data as unknown as GiftCard).id
-        await giftCardsApi.send(cardId, recipient.email)
+        // Only send immediately if not scheduled; scheduled cards are processed by the backend scheduler
+        if (!scheduleMode) {
+          await giftCardsApi.send(cardId, recipient.email)
+        }
         successCount++
       } catch {
         errors.push(recipient.email)
@@ -211,12 +222,18 @@ export default function BulkGiftCardPage() {
 
     if (errors.length > 0 && successCount === 0) {
       // All failed — likely demo/backend-unavailable mode, show partial success
-      toast.success(`${recipients.length} gift card${recipients.length !== 1 ? 's' : ''} queued (demo mode — backend unavailable)`)
+      const label = scheduleMode ? 'scheduled' : 'queued'
+      toast.success(`${recipients.length} gift card${recipients.length !== 1 ? 's' : ''} ${label} (demo mode — backend unavailable)`)
       setSentCount(recipients.length)
     } else if (errors.length > 0) {
-      toast.error(`Sent ${successCount} card${successCount !== 1 ? 's' : ''}, failed for: ${errors.slice(0, 3).join(', ')}${errors.length > 3 ? ` and ${errors.length - 3} more` : ''}`)
+      const verb = scheduleMode ? 'Scheduled' : 'Sent'
+      toast.error(`${verb} ${successCount} card${successCount !== 1 ? 's' : ''}, failed for: ${errors.slice(0, 3).join(', ')}${errors.length > 3 ? ` and ${errors.length - 3} more` : ''}`)
     } else {
-      toast.success(`${successCount} gift card${successCount !== 1 ? 's' : ''} sent successfully!`)
+      if (scheduleMode && data.scheduledAt) {
+        toast.success(`${successCount} gift card${successCount !== 1 ? 's' : ''} scheduled for ${new Date(data.scheduledAt).toLocaleString()}!`)
+      } else {
+        toast.success(`${successCount} gift card${successCount !== 1 ? 's' : ''} sent successfully!`)
+      }
     }
     setStep(4) // success screen
   })
@@ -341,6 +358,37 @@ export default function BulkGiftCardPage() {
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
                   {...register('message')}
                 />
+              </div>
+
+              {/* Scheduling */}
+              <div className="border border-gray-200 rounded-xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Clock size={16} className="text-indigo-500" />
+                    <span className="text-sm font-medium text-gray-700">Schedule for later</span>
+                  </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={scheduleMode}
+                    onClick={() => setScheduleMode(!scheduleMode)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${scheduleMode ? 'bg-indigo-600' : 'bg-gray-200'}`}
+                  >
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${scheduleMode ? 'translate-x-6' : 'translate-x-1'}`} />
+                  </button>
+                </div>
+                {scheduleMode && (
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs text-gray-500">Send date & time</label>
+                    <input
+                      type="datetime-local"
+                      min={new Date(Date.now() + 60_000).toISOString().slice(0, 16)}
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      {...register('scheduledAt')}
+                    />
+                    <p className="text-xs text-gray-400">All gift card emails will be delivered automatically at the chosen time.</p>
+                  </div>
+                )}
               </div>
             </form>
 
@@ -514,12 +562,17 @@ export default function BulkGiftCardPage() {
       {step === 3 && (
         <Card className="max-w-lg mx-auto">
           <div className="text-center">
-            <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Send size={28} className="text-indigo-600" />
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${scheduleMode ? 'bg-amber-100' : 'bg-indigo-100'}`}>
+              {scheduleMode ? <Clock size={28} className="text-amber-600" /> : <Send size={28} className="text-indigo-600" />}
             </div>
-            <h2 className="font-semibold text-gray-900 text-xl mb-2">Ready to Send!</h2>
+            <h2 className="font-semibold text-gray-900 text-xl mb-2">
+              {scheduleMode ? 'Schedule Gift Cards' : 'Ready to Send!'}
+            </h2>
             <p className="text-gray-500 mb-6">
-              Review the details before sending to <strong>{recipients.length}</strong> employee{recipients.length !== 1 ? 's' : ''}
+              {scheduleMode
+                ? <>Emails will be automatically sent to <strong>{recipients.length}</strong> employee{recipients.length !== 1 ? 's' : ''} at the scheduled time.</>
+                : <>Review the details before sending to <strong>{recipients.length}</strong> employee{recipients.length !== 1 ? 's' : ''}</>
+              }
             </p>
 
             <div className="bg-gray-50 rounded-xl p-4 text-left mb-6 space-y-2">
@@ -543,6 +596,12 @@ export default function BulkGiftCardPage() {
                 <span className="text-gray-500">Template</span>
                 <span className="font-medium">{selectedTemplate?.name || 'Default'}</span>
               </div>
+              {scheduleMode && formValues.scheduledAt && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Scheduled for</span>
+                  <span className="font-medium text-amber-600">{new Date(formValues.scheduledAt).toLocaleString()}</span>
+                </div>
+              )}
             </div>
 
             <div className="bg-white border border-gray-200 rounded-xl p-3 mb-6 text-left max-h-32 overflow-y-auto">
@@ -557,12 +616,15 @@ export default function BulkGiftCardPage() {
             <div className="flex gap-3">
               <Button variant="outline" className="flex-1" onClick={() => setStep(2)}>Back</Button>
               <Button
-                className="flex-1"
+                className={`flex-1 ${scheduleMode ? 'bg-amber-500 hover:bg-amber-600' : ''}`}
                 loading={sending}
-                leftIcon={<Send size={16} />}
+                leftIcon={scheduleMode ? <Clock size={16} /> : <Send size={16} />}
                 onClick={handleBulkSend}
               >
-                Send {recipients.length} Gift Card{recipients.length !== 1 ? 's' : ''}
+                {scheduleMode
+                  ? `Schedule ${recipients.length} Gift Card${recipients.length !== 1 ? 's' : ''}`
+                  : `Send ${recipients.length} Gift Card${recipients.length !== 1 ? 's' : ''}`
+                }
               </Button>
             </div>
           </div>
@@ -577,10 +639,13 @@ export default function BulkGiftCardPage() {
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">All Done! 🎉</h2>
           <p className="text-gray-500 mb-2">
-            <strong className="text-emerald-600">{sentCount || recipients.length}</strong> gift card{(sentCount || recipients.length) !== 1 ? 's' : ''} sent successfully.
+            <strong className="text-emerald-600">{sentCount || recipients.length}</strong> gift card{(sentCount || recipients.length) !== 1 ? 's' : ''} {scheduleMode ? 'scheduled' : 'sent'} successfully.
           </p>
           <p className="text-sm text-gray-400 mb-8">
-            Each employee will receive their gift card via email. They can customize and download it from their dashboard.
+            {scheduleMode && formValues.scheduledAt
+              ? `Emails will be delivered automatically at ${new Date(formValues.scheduledAt).toLocaleString()}.`
+              : 'Each employee will receive their gift card via email. They can customize and download it from their dashboard.'
+            }
           </p>
           <div className="flex gap-3 justify-center">
             <Button variant="outline" onClick={() => navigate('/gift-cards')}>

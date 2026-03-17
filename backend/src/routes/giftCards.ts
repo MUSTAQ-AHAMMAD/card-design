@@ -19,7 +19,7 @@ router.get('/:id', getGiftCard)
 router.put('/:id', validate, updateGiftCard)
 router.delete('/:id', deleteGiftCard)
 router.post('/:id/send',
-  [body('recipientEmail').isEmail().normalizeEmail().withMessage('Valid recipient email is required')],
+  [body('recipientEmail').optional().isEmail().normalizeEmail().withMessage('Valid recipient email is required')],
   validate,
   sendGiftCard
 )

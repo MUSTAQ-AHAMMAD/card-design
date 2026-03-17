@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Check, ChevronRight, Send, Pencil } from 'lucide-react'
+import { Check, ChevronRight, Send, Pencil, Clock } from 'lucide-react'
 import { templatesApi, giftCardsApi } from '../../services/api'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
@@ -29,6 +29,7 @@ const customizeSchema = z.object({
   amount: z.number().min(1, 'Amount must be at least $1'),
   occasion: z.string().min(1, 'Occasion is required'),
   message: z.string().optional(),
+  scheduledAt: z.string().optional(),
 })
 
 type CustomizeForm = z.infer<typeof customizeSchema>
@@ -55,6 +56,7 @@ export default function GiftCardCreatorPage() {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null)
   const [sending, setSending] = useState(false)
   const [createdCardId, setCreatedCardId] = useState<string | null>(null)
+  const [scheduleMode, setScheduleMode] = useState(false)
 
   // Design customization overrides
   const [backgroundColor, setBackgroundColor] = useState('')
@@ -103,6 +105,10 @@ export default function GiftCardCreatorPage() {
     : null
 
   const handleCustomize = handleSubmit(async (data) => {
+    if (scheduleMode && !data.scheduledAt) {
+      toast.error('Please select a date and time to schedule the email')
+      return
+    }
     setSending(true)
     try {
       const res = await giftCardsApi.create({
@@ -112,6 +118,7 @@ export default function GiftCardCreatorPage() {
         recipientEmail: data.recipientEmail,
         recipientName: data.recipientName,
         templateId: selectedTemplate?.id,
+        scheduledAt: scheduleMode && data.scheduledAt ? new Date(data.scheduledAt).toISOString() : undefined,
       })
       setCreatedCardId(res.data.id)
       setStep(2)
@@ -126,6 +133,16 @@ export default function GiftCardCreatorPage() {
   })
 
   const handleSend = async () => {
+    // If scheduled mode, the card was already created with scheduledAt — no need to send now
+    if (scheduleMode) {
+      const scheduledDate = formValues.scheduledAt
+        ? new Date(formValues.scheduledAt).toLocaleString()
+        : 'the scheduled time'
+      toast.success(`Gift card scheduled! It will be sent to ${formValues.recipientEmail} at ${scheduledDate}.`)
+      navigate('/gift-cards')
+      return
+    }
+
     if (!createdCardId) {
       toast.success('Gift card sent! (Demo mode)')
       navigate('/gift-cards')
@@ -285,6 +302,37 @@ export default function GiftCardCreatorPage() {
                 />
               </div>
 
+              {/* Scheduling */}
+              <div className="border border-gray-200 rounded-xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Clock size={16} className="text-indigo-500" />
+                    <span className="text-sm font-medium text-gray-700">Schedule for later</span>
+                  </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={scheduleMode}
+                    onClick={() => setScheduleMode(!scheduleMode)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${scheduleMode ? 'bg-indigo-600' : 'bg-gray-200'}`}
+                  >
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${scheduleMode ? 'translate-x-6' : 'translate-x-1'}`} />
+                  </button>
+                </div>
+                {scheduleMode && (
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs text-gray-500">Send date & time</label>
+                    <input
+                      type="datetime-local"
+                      min={new Date(Date.now() + 60_000).toISOString().slice(0, 16)}
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      {...register('scheduledAt')}
+                    />
+                    <p className="text-xs text-gray-400">The email will be delivered automatically at the chosen time.</p>
+                  </div>
+                )}
+              </div>
+
               {/* Design customization */}
               <div className="border-t border-gray-100 pt-4 space-y-4">
                 <h3 className="text-sm font-semibold text-gray-800">Design Customization</h3>
@@ -399,7 +447,7 @@ export default function GiftCardCreatorPage() {
           <div className="flex gap-3 mt-8 justify-center">
             <Button variant="outline" onClick={() => setStep(1)}>Back</Button>
             <Button rightIcon={<ChevronRight size={16} />} onClick={() => setStep(3)}>
-              Confirm & Send
+              {scheduleMode ? 'Confirm & Schedule' : 'Confirm & Send'}
             </Button>
           </div>
         </Card>
@@ -409,12 +457,17 @@ export default function GiftCardCreatorPage() {
       {step === 3 && (
         <Card className="max-w-lg mx-auto">
           <div className="text-center">
-            <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Send size={28} className="text-indigo-600" />
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${scheduleMode ? 'bg-amber-100' : 'bg-indigo-100'}`}>
+              {scheduleMode ? <Clock size={28} className="text-amber-600" /> : <Send size={28} className="text-indigo-600" />}
             </div>
-            <h2 className="font-semibold text-gray-900 text-xl mb-2">Ready to Send!</h2>
+            <h2 className="font-semibold text-gray-900 text-xl mb-2">
+              {scheduleMode ? 'Schedule Gift Card' : 'Ready to Send!'}
+            </h2>
             <p className="text-gray-500 mb-6">
-              The gift card will be sent to <strong>{formValues.recipientEmail}</strong>
+              {scheduleMode
+                ? <>The gift card will be automatically emailed to <strong>{formValues.recipientEmail}</strong> at the scheduled time.</>
+                : <>The gift card will be sent to <strong>{formValues.recipientEmail}</strong></>
+              }
             </p>
 
             <div className="bg-gray-50 rounded-xl p-4 text-left mb-6 space-y-2">
@@ -434,14 +487,25 @@ export default function GiftCardCreatorPage() {
                 <span className="text-gray-500">Template</span>
                 <span className="font-medium">{selectedTemplate?.name || 'Default'}</span>
               </div>
+              {scheduleMode && formValues.scheduledAt && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Scheduled for</span>
+                  <span className="font-medium text-amber-600">{new Date(formValues.scheduledAt).toLocaleString()}</span>
+                </div>
+              )}
             </div>
 
             <div className="flex gap-3">
               <Button variant="outline" className="flex-1" onClick={() => setStep(2)}>
                 Back
               </Button>
-              <Button className="flex-1" loading={sending} leftIcon={<Send size={16} />} onClick={handleSend}>
-                Send Gift Card
+              <Button
+                className={`flex-1 ${scheduleMode ? 'bg-amber-500 hover:bg-amber-600' : ''}`}
+                loading={sending}
+                leftIcon={scheduleMode ? <Clock size={16} /> : <Send size={16} />}
+                onClick={handleSend}
+              >
+                {scheduleMode ? 'Schedule' : 'Send Gift Card'}
               </Button>
             </div>
           </div>
