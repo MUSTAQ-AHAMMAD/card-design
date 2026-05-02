@@ -11,7 +11,10 @@ const authenticate = (req, res, next) => {
         }
         const token = authHeader.split(' ')[1];
         const decoded = (0, tokenService_1.verifyAccessToken)(token);
-        req.user = decoded;
+        req.user = {
+            ...decoded,
+            userId: decoded.userId || decoded.id
+        };
         next();
     }
     catch (error) {

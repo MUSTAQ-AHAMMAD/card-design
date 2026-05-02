@@ -14,6 +14,6 @@ router.post('/', [
 router.get('/:id', giftCardController_1.getGiftCard);
 router.put('/:id', validate_1.validate, giftCardController_1.updateGiftCard);
 router.delete('/:id', giftCardController_1.deleteGiftCard);
-router.post('/:id/send', [(0, express_validator_1.body)('recipientEmail').isEmail().normalizeEmail().withMessage('Valid recipient email is required')], validate_1.validate, giftCardController_1.sendGiftCard);
+router.post('/:id/send', [(0, express_validator_1.body)('recipientEmail').optional().isEmail().normalizeEmail().withMessage('Valid recipient email is required')], validate_1.validate, giftCardController_1.sendGiftCard);
 exports.default = router;
 //# sourceMappingURL=giftCards.js.map

@@ -10,13 +10,13 @@ export declare const verifyRefreshToken: (token: string) => TokenPayload;
 export declare const saveRefreshToken: (userId: string, token: string) => Promise<void>;
 export declare const findRefreshToken: (token: string) => Promise<({
     user: {
+        role: string;
         id: string;
         createdAt: Date;
         firstName: string;
         lastName: string;
         email: string;
         password: string;
-        role: string;
         avatar: string | null;
         isActive: boolean;
         resetToken: string | null;
