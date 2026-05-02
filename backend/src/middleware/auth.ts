@@ -11,7 +11,10 @@ export const authenticate = (req: Request, res: Response, next: NextFunction): v
 
     const token = authHeader.split(' ')[1]
     const decoded = verifyAccessToken(token)
-    req.user = decoded as { id: string; email: string; role: string }
+    req.user = {
+      ...decoded as { id: string; email: string; role: string },
+      userId: (decoded as any).userId || (decoded as any).id
+    }
     next()
   } catch (error) {
     next(new AppError('Invalid or expired token', 401))

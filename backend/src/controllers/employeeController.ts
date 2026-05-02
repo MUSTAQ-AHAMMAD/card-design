@@ -21,15 +21,15 @@ export const getAllEmployees = async (
 
     if (search) {
       where.OR = [
-        { email: { contains: search, mode: 'insensitive' } },
-        { firstName: { contains: search, mode: 'insensitive' } },
-        { lastName: { contains: search, mode: 'insensitive' } },
-        { displayName: { contains: search, mode: 'insensitive' } }
+        { email: { contains: search } },
+        { firstName: { contains: search } },
+        { lastName: { contains: search } },
+        { displayName: { contains: search } }
       ];
     }
 
     if (department) {
-      where.department = { contains: department, mode: 'insensitive' };
+      where.department = { contains: department };
     }
 
     const [employees, total] = await Promise.all([
@@ -45,7 +45,7 @@ export const getAllEmployees = async (
     res.json({
       success: true,
       data: {
-        data: employees,
+        data: employees as any,
         pagination: {
           page,
           limit,
@@ -83,7 +83,7 @@ export const getEmployeeById = async (
 
     res.json({
       success: true,
-      data: employee
+      data: employee as any
     });
   } catch (error) {
     next(error);
@@ -210,11 +210,11 @@ export const searchEmployees = async (
     const employees = await prisma.employeeCache.findMany({
       where: {
         OR: [
-          { email: { contains: query, mode: 'insensitive' } },
-          { firstName: { contains: query, mode: 'insensitive' } },
-          { lastName: { contains: query, mode: 'insensitive' } },
-          { displayName: { contains: query, mode: 'insensitive' } },
-          { department: { contains: query, mode: 'insensitive' } }
+          { email: { contains: query } },
+          { firstName: { contains: query } },
+          { lastName: { contains: query } },
+          { displayName: { contains: query } },
+          { department: { contains: query } }
         ]
       },
       take: limit,
@@ -223,7 +223,7 @@ export const searchEmployees = async (
 
     res.json({
       success: true,
-      data: employees
+      data: employees as any
     });
   } catch (error) {
     next(error);

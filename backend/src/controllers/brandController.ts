@@ -31,8 +31,8 @@ export const getAllBrands = async (
 
     if (search) {
       where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } }
+        { name: { contains: search } },
+        { description: { contains: search } }
       ];
     }
 
@@ -66,7 +66,7 @@ export const getAllBrands = async (
     res.json({
       success: true,
       data: {
-        data: brandsWithCount as BrandWithAssets[],
+        data: brandsWithCount as any,
         pagination: {
           page,
           limit,
@@ -118,7 +118,7 @@ export const getBrandById = async (
 
     res.json({
       success: true,
-      data: brandWithCount as BrandWithAssets
+      data: brandWithCount as any
     });
   } catch (error) {
     next(error);
@@ -175,7 +175,7 @@ export const createBrand = async (
     res.status(201).json({
       success: true,
       message: 'Brand created successfully',
-      data: brand
+      data: brand as any
     });
   } catch (error) {
     next(error);
@@ -244,7 +244,7 @@ export const updateBrand = async (
     res.json({
       success: true,
       message: 'Brand updated successfully',
-      data: brand
+      data: brand as any
     });
   } catch (error) {
     next(error);

@@ -39,7 +39,7 @@ const listGiftCards = async (req, res, next) => {
 exports.listGiftCards = listGiftCards;
 const createGiftCard = async (req, res, next) => {
     try {
-        const { templateId, customizations, amount, occasion, message, scheduledAt } = req.body;
+        const { templateId, customizations, amount, occasion, message, scheduledAt, recipientEmail, recipientName, personalMessage } = req.body;
         const giftCard = await prisma_1.default.giftCard.create({
             data: {
                 templateId: templateId || null,
@@ -47,7 +47,9 @@ const createGiftCard = async (req, res, next) => {
                 customizations: typeof customizations === 'string' ? customizations : JSON.stringify(customizations || {}),
                 amount: parseFloat(amount),
                 occasion,
-                message,
+                message: message || personalMessage || null,
+                recipientEmail: recipientEmail || null,
+                recipientName: recipientName || null,
                 scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
                 status: 'DRAFT',
             },
@@ -108,7 +110,7 @@ const updateGiftCard = async (req, res, next) => {
         if (existing.status !== 'DRAFT') {
             throw new errorHandler_1.AppError('Only DRAFT gift cards can be edited', 400);
         }
-        const { customizations, amount, occasion, message, scheduledAt, templateId } = req.body;
+        const { customizations, amount, occasion, message, scheduledAt, templateId, recipientEmail, recipientName } = req.body;
         const updated = await prisma_1.default.giftCard.update({
             where: { id: req.params.id },
             data: {
@@ -118,6 +120,8 @@ const updateGiftCard = async (req, res, next) => {
                 ...(occasion && { occasion }),
                 ...(message !== undefined && { message }),
                 ...(scheduledAt !== undefined && { scheduledAt: scheduledAt ? new Date(scheduledAt) : null }),
+                ...(recipientEmail !== undefined && { recipientEmail: recipientEmail || null }),
+                ...(recipientName !== undefined && { recipientName: recipientName || null }),
             },
             include: {
                 template: { select: { id: true, name: true, category: true } },
@@ -150,7 +154,6 @@ const deleteGiftCard = async (req, res, next) => {
 exports.deleteGiftCard = deleteGiftCard;
 const sendGiftCard = async (req, res, next) => {
     try {
-        const { recipientEmail } = req.body;
         const user = req.user;
         const giftCard = await prisma_1.default.giftCard.findFirst({
             where: { id: req.params.id, deletedAt: null },
@@ -164,6 +167,10 @@ const sendGiftCard = async (req, res, next) => {
         if (giftCard.status !== 'DRAFT') {
             throw new errorHandler_1.AppError('Gift card has already been sent', 400);
         }
+        // Resolve recipient email: prefer the one from the request body, fall back to the stored one
+        const effectiveRecipientEmail = req.body.recipientEmail || giftCard.recipientEmail || '';
+        if (!effectiveRecipientEmail)
+            throw new errorHandler_1.AppError('Recipient email is required', 400);
         let emailStatus = 'SENT';
         let emailError = null;
         try {
@@ -173,7 +180,7 @@ const sendGiftCard = async (req, res, next) => {
                 occasion: giftCard.occasion,
                 message: giftCard.message,
                 employee: giftCard.employee,
-            }, recipientEmail);
+            }, effectiveRecipientEmail);
         }
         catch (err) {
             emailStatus = 'FAILED';
@@ -193,7 +200,7 @@ const sendGiftCard = async (req, res, next) => {
                 data: {
                     giftCardId: giftCard.id,
                     userId: user.id,
-                    recipient: recipientEmail,
+                    recipient: effectiveRecipientEmail,
                     subject: `You've received a ${giftCard.occasion} Gift Card!`,
                     status: emailStatus,
                     error: emailError,
